@@ -31,6 +31,7 @@ public class ApplicationConfig extends Application {
     private void addRestResourceClasses(Set<Class<?>> resources) {
         resources.add(sg.edu.nus.iss.phoenix.restful.authenticate.AuthenticateRESTService.class);
         resources.add(sg.edu.nus.iss.phoenix.restful.radioprogram.ProgramRESTService.class);
+        resources.add(sg.edu.nus.iss.phoenix.restful.schedule.ScheduleRESTService.class);
     }
     
 }
