@@ -20,8 +20,7 @@ public class WeeklySchedule implements Cloneable, Serializable {
     private int weekId;
     private Date startDate;
     private String assignedBy;
-    private int programSlotId;
-    private String yearAS;
+    private String year;
     
     /** 
      * Constructors. 
@@ -37,12 +36,11 @@ public class WeeklySchedule implements Cloneable, Serializable {
         this.weekId = weekId;
     }
     
-    public WeeklySchedule(int weekId, Date startDate, String assignedBy, int programSlotId, String yearAS) {
+    public WeeklySchedule(int weekId, Date startDate, String assignedBy, String year) {
         this.weekId = weekId;
         this.startDate = startDate;
         this.assignedBy = assignedBy;
-        this.programSlotId = programSlotId;
-        this.yearAS = yearAS;
+        this.year = year;
     }
     
     /**
@@ -75,19 +73,11 @@ public class WeeklySchedule implements Cloneable, Serializable {
         this.assignedBy = assignedBy;
     }
     
-    public int getProgramSlotId() {
-        return programSlotId;
+    public String getYear() {
+        return year;
     }
     
-    public void setProgramSlotId(int programSlotId) {
-        this.programSlotId = programSlotId;
-    }
-    
-    public String getYearAS() {
-        return yearAS;
-    }
-    
-    public void setYear(String yearAS) {
-        this.yearAS = yearAS;
+    public void setYear(String year) {
+        this.year = year;
     }
 }

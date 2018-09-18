@@ -40,7 +40,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#getObject(java.lang.String)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#getObjectAS(java.lang.String)
     */
     @Override
     public AnnualSchedule getObjectAS(String year) throws NotFoundException,
@@ -53,25 +53,24 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#load(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#loadAS(sg.edu.nus.iss.phoenix.entity.schedule.AnnualSchedule)
     */
     @Override
     public void loadAS(AnnualSchedule valueObjectAS) throws NotFoundException,
             SQLException {
         
         if (valueObjectAS.getYear() == null) {
-            // System.out.println("Can not select without Primary-Key!");
-            throw new NotFoundException("Can not select without Primary-Key!");
+            throw new NotFoundException(DBConstants.exc_missing_primary_key);
         }
         
-        String sql = "SELECT * FROM `tblannualschedule` WHERE (`year` = ? ); ";
+        String sql = "SELECT * FROM "+DBConstants.aScheduleTableName+" WHERE ("+DBConstants.a_year+" = ? ); ";
         PreparedStatement stmt = null;
         openConnection();
         try {
             stmt = connection.prepareStatement(sql);
             stmt.setString(1, valueObjectAS.getYear());
             
-            //singleQueryAS(stmt, valueObjectAS);
+            singleQueryAS(stmt, valueObjectAS);
             
         } finally {
             if (stmt != null)
@@ -81,7 +80,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#create(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createAS(sg.edu.nus.iss.phoenix.entity.schedule.AnnualSchedule)
     */
     @Override
     public synchronized void createAS(AnnualSchedule valueObjectAS)
@@ -91,14 +90,13 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         PreparedStatement stmt = null;
         openConnection();
         try {
-            sql = "INSERT INTO `tblannualschedule` (`year`, `assignedBy`) VALUES (?,?); ";
+            sql = "INSERT INTO "+DBConstants.aScheduleTableName+" ("+DBConstants.a_year+","+DBConstants.a_assignedBy+") VALUES (?,?); ";
             stmt = connection.prepareStatement(sql);
             stmt.setString(1, valueObjectAS.getYear());
             stmt.setString(2, valueObjectAS.getAssignedBy());
             int rowcount = databaseUpdate(stmt);
             if (rowcount != 1) {
-                // System.out.println("PrimaryKey Error when updating DB!");
-                throw new SQLException("PrimaryKey Error when updating DB!");
+                throw new SQLException(DBConstants.exc_duplicate_primary_key);
             }
         } finally {
             if (stmt != null)
@@ -109,12 +107,12 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#loadAll()
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#loadAllAS()
     */
     @Override
     public List<AnnualSchedule> loadAllAS() throws SQLException {
         openConnection();
-        String sql = "SELECT * FROM `tblannualschedule` ORDER BY `year` ASC; ";
+        String sql = "SELECT * FROM "+DBConstants.aScheduleTableName+" ORDER BY "+DBConstants.a_year+" ASC; ";
         List<AnnualSchedule> searchResults = listQueryAS(connection
                 .prepareStatement(sql));
         closeConnection();
@@ -123,7 +121,22 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createValueObject()
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#loadAllWS()
+    */
+    @Override
+    public List<WeeklySchedule> loadAllWS(String year) throws SQLException {
+        openConnection();
+        String sql = "SELECT * FROM "+DBConstants.wScheduleTableName+" WHERE "+DBConstants.w_year+" LIKE "+year
+                +" ORDER BY "+DBConstants.w_year+" ASC; ";
+        List<WeeklySchedule> searchResults = listQueryWS(connection
+                .prepareStatement(sql));
+        closeConnection();
+        System.out.println("record size"+searchResults.size());
+        return searchResults;
+    }
+    
+    /* (non-Javadoc)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createValueObjectWS()
     */
     @Override
     public WeeklySchedule createValueObjectWS() {
@@ -131,7 +144,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#getObject(java.lang.String)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#getObjectWS(java.lang.String)
     */
     @Override
     public WeeklySchedule getObjectWS(String year) throws NotFoundException,
@@ -144,18 +157,17 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#load(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#loadWS(sg.edu.nus.iss.phoenix.entity.schedule.WeeklySchedule)
     */
     @Override
     public void loadWS(WeeklySchedule valueObjectWS) throws NotFoundException,
             SQLException {
         
         if (valueObjectWS.getWeekId() == 0) {
-            // System.out.println("Can not select without Primary-Key!");
-            throw new NotFoundException("Can not select without Primary-Key!");
+            throw new NotFoundException(DBConstants.exc_missing_primary_key);
         }
         
-        String sql = "SELECT * FROM `tblweeklyschedule` WHERE (`yearAS` = ? ); ";
+        String sql = "SELECT * FROM "+DBConstants.wScheduleTableName+" WHERE ("+DBConstants.w_year+" = ? ); ";
         PreparedStatement stmt = null;
         openConnection();
         try {
@@ -172,7 +184,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#create(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createWS(sg.edu.nus.iss.phoenix.entity.schedule.WeeklySchedule)
     */
     @Override
     public synchronized void createWS(WeeklySchedule valueObjectWS)
@@ -182,16 +194,15 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         PreparedStatement stmt = null;
         openConnection();
         try {
-            sql = "INSERT INTO `tblweeklyschedule` (`startDate`, `assignedBy`, `programSlotId`, `yearAS`) VALUES (?,?,?,?); ";
+            sql = "INSERT INTO "+DBConstants.wScheduleTableName+" ("+DBConstants.w_weekId+","+DBConstants.w_startDate+","+DBConstants.w_assignedBy+","+DBConstants.w_year+") VALUES (?,?,?,?); ";
             stmt = connection.prepareStatement(sql);
-            stmt.setDate(1, valueObjectWS.getStartDate());
-            stmt.setString(2, valueObjectWS.getAssignedBy());
-            stmt.setInt(3, valueObjectWS.getProgramSlotId());
-            stmt.setString(4, valueObjectWS.getYearAS());
+            stmt.setInt(1, valueObjectWS.getWeekId());
+            stmt.setDate(2, valueObjectWS.getStartDate());
+            stmt.setString(3, valueObjectWS.getAssignedBy());
+            stmt.setString(4, valueObjectWS.getYear());
             int rowcount = databaseUpdate(stmt);
             if (rowcount != 1) {
-                // System.out.println("PrimaryKey Error when updating DB!");
-                throw new SQLException("PrimaryKey Error when updating DB!");
+                throw new SQLException(DBConstants.exc_duplicate_primary_key);
             }
         } finally {
             if (stmt != null)
@@ -202,7 +213,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createValueObject()
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createValueObjectPS()
     */
     @Override
     public ProgramSlot createValueObjectPS() {
@@ -210,7 +221,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#getObject(java.lang.String)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#getObjectPS(java.lang.Integer)
     */
     @Override
     public ProgramSlot getObjectPS(int programSlotId) throws NotFoundException,
@@ -223,18 +234,17 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#load(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#loadPS(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
     */
     @Override
     public void loadPS(ProgramSlot valueObject) throws NotFoundException,
             SQLException {
         
         if (valueObject.getProgramSlotId() == 0) {
-            // System.out.println("Can not select without Primary-Key!");
             throw new NotFoundException("Can not select without Primary-Key!");
         }
         
-        String sql = "SELECT * FROM `tblprogramslot` WHERE (`programSlotId` = ? ); ";
+        String sql = "SELECT * FROM "+DBConstants.scheduleTableName+" WHERE ("+DBConstants.p_id+" = ? ); ";
         PreparedStatement stmt = null;
         openConnection();
         try {
@@ -256,7 +266,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     @Override
     public List<ProgramSlot> loadAll() throws SQLException {
         openConnection();
-        String sql = "SELECT * FROM `tblprogramslot` ORDER BY `programSlotId` ASC; ";
+        String sql = "SELECT * FROM "+DBConstants.scheduleTableName+" ORDER BY "+DBConstants.p_id+" ASC; ";
         List<ProgramSlot> searchResults = listQuery(connection
                 .prepareStatement(sql));
         closeConnection();
@@ -265,7 +275,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#create(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createPS(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
     */
     @Override
     public synchronized void createPS(ProgramSlot valueObject)
@@ -276,7 +286,9 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         openConnection();
         try {
             //create a program slot
-            sql = "INSERT INTO `tblprogramslot` (`assignedBy`, `duration`, `startDate`, `programName`, `presenterId`, `producerId`, `weekId`) VALUES (?,?,?,?,?,?,?); ";
+            sql = "INSERT INTO "+DBConstants.scheduleTableName+" ("+DBConstants.p_assignedBy+","
+                    +DBConstants.p_duration+","+DBConstants.p_startDate+","+DBConstants.p_programName+","
+                    +DBConstants.p_presenterId+","+DBConstants.p_producerId+","+DBConstants.p_weekId+") VALUES (?,?,?,?,?,?,?); ";
             stmt = connection.prepareStatement(sql);
             stmt.setString(1, valueObject.getAssignedBy());
             stmt.setInt(2, valueObject.getDuration());
@@ -287,15 +299,8 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             stmt.setInt(7, valueObject.getWeekId());
             int rowcount = databaseUpdate(stmt);
             if (rowcount != 1) {
-                // System.out.println("PrimaryKey Error when updating DB!");
-                throw new SQLException("PrimaryKey Error when updating DB!");
-            }
-            
-            //ResultSet rs = stmt.getGeneratedKeys();
-            //int id = 0;
-            //if (rs.next()) {
-                //valueObject.setProgramSlotId(rs.getInt("programSlotId"));
-            //}
+                throw new SQLException(DBConstants.exc_duplicate_primary_key);
+            }            
         } finally {
             if (stmt != null)
                 stmt.close();
@@ -311,9 +316,9 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     public void save(ProgramSlot valueObject) throws NotFoundException,
             SQLException {
         
-        String sql = "UPDATE `tblprogramslot` SET `assignedBy` = ?,`duration` = ?, "
-                + "`startDate` = ?, `programName` = ?, `presenterId` = ?, "
-                + "`producerId` = ?, `weekId` = ? WHERE (`programSlotId` = ? ); ";
+        String sql = "UPDATE "+DBConstants.scheduleTableName+" SET "+DBConstants.p_assignedBy+" = ?, "+DBConstants.p_duration+" = ?, "
+                +DBConstants.p_startDate+" = ?, "+DBConstants.p_programName+" = ?, "+DBConstants.p_presenterId+" = ?, "
+                +DBConstants.p_producerId+" = ?, "+DBConstants.p_weekId+" = ? WHERE ("+DBConstants.p_id+" = ? ); ";
         PreparedStatement stmt = null;
         openConnection();
         try {
@@ -324,19 +329,15 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             stmt.setString(4, valueObject.getProgramName());
             stmt.setInt(5, valueObject.getPresenterId());
             stmt.setInt(6, valueObject.getProducerId());
-            stmt.setInt(7, valueObject.getWeekId());            
+            stmt.setInt(7, valueObject.getWeekId());
             stmt.setInt(8, valueObject.getProgramSlotId());
             
             int rowcount = databaseUpdate(stmt);
             if (rowcount == 0) {
-                // System.out.println("Object could not be saved! (PrimaryKey not found)");
-                throw new NotFoundException(
-                        "Object could not be saved! (PrimaryKey not found)");
+                throw new NotFoundException(DBConstants.exc_missing_primary_key);
             }
             if (rowcount > 1) {
-                // System.out.println("PrimaryKey Error when updating DB! (Many objects were affected!)");
-                throw new SQLException(
-                        "PrimaryKey Error when updating DB! (Many objects were affected!)");
+                throw new SQLException(DBConstants.exc_duplicate_primary_key);
             }
         } finally {
             if (stmt != null)
@@ -353,11 +354,10 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             SQLException {
         
         if (valueObject.getProgramSlotId() == 0) {
-            // System.out.println("Can not delete without Primary-Key!");
-            throw new NotFoundException("Can not delete without Primary-Key!");
+            throw new NotFoundException(DBConstants.exc_missing_primary_key);
         }
         
-        String sql = "DELETE FROM `tblprogramslot` WHERE (`programSlotId` = ? ); ";
+        String sql = "DELETE FROM "+DBConstants.scheduleTableName+" WHERE ("+DBConstants.p_id+" = ? ); ";
         PreparedStatement stmt = null;
         openConnection();
         try {
@@ -366,14 +366,10 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             
             int rowcount = databaseUpdate(stmt);
             if (rowcount == 0) {
-                // System.out.println("Object could not be deleted (PrimaryKey not found)");
-                throw new NotFoundException(
-                        "Object could not be deleted! (PrimaryKey not found)");
+                throw new NotFoundException(DBConstants.exc_missing_primary_key);
             }
             if (rowcount > 1) {
-                // System.out.println("PrimaryKey Error when updating DB! (Many objects were deleted!)");
-                throw new SQLException(
-                        "PrimaryKey Error when updating DB! (Many objects were deleted!)");
+                throw new SQLException(DBConstants.exc_duplicate_primary_key);
             }
         } finally {
             if (stmt != null)
@@ -388,7 +384,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     @Override
     public void deleteAll(Connection conn) throws SQLException {
         
-        String sql = "DELETE FROM `tblprogramslot";
+        String sql = "DELETE FROM "+DBConstants.scheduleTableName+"; ";
         PreparedStatement stmt = null;
         openConnection();
         try {
@@ -409,7 +405,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     @Override
     public int countAll() throws SQLException {
         
-        String sql = "SELECT count(*) FROM `tblprogramslot`";
+        String sql = "SELECT count(*) FROM "+DBConstants.scheduleTableName+"; ";
         PreparedStatement stmt = null;
         ResultSet result = null;
         int allRows = 0;
@@ -441,13 +437,13 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         openConnection();
         boolean first = true;
         StringBuilder sql = new StringBuilder(
-                "SELECT * FROM `tblprogramslot` WHERE 1=1 ");
+                "SELECT * FROM "+DBConstants.scheduleTableName+" WHERE 1=1 ");
         
         if (valueObject.getProgramSlotId() != 0) {
             if (first) {
                 first = false;
             }
-            sql.append("AND `programSlotId` LIKE '").append(valueObject.getProgramSlotId())
+            sql.append("AND "+DBConstants.p_id+" LIKE '").append(valueObject.getProgramSlotId())
                     .append("%' ");
         }
         
@@ -455,7 +451,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             if (first) {
                 first = false;
             }
-            sql.append("AND `assignedBy` = '")
+            sql.append("AND "+DBConstants.p_assignedBy+" = '")
                     .append(valueObject.getAssignedBy()).append("' ");
         }
         
@@ -463,7 +459,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             if (first) {
                 first = false;
             }
-            sql.append("AND `duration` = '")
+            sql.append("AND "+DBConstants.p_duration+" = '")
                     .append(valueObject.getDuration()).append("' ");
         }
         
@@ -471,7 +467,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             if (first) {
                 first = false;
             }
-            sql.append("AND `startDate` = '")
+            sql.append("AND "+DBConstants.p_startDate+" = '")
                     .append(valueObject.getStartDate()).append("' ");
         }
         
@@ -479,7 +475,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             if (first) {
                 first = false;
             }
-            sql.append("AND `programName` = '")
+            sql.append("AND "+DBConstants.p_programName+" = '")
                     .append(valueObject.getProgramName()).append("' ");
         }
         
@@ -487,7 +483,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             if (first) {
                 first = false;
             }
-            sql.append("AND `presenterId` = '")
+            sql.append("AND "+DBConstants.p_presenterId+" = '")
                     .append(valueObject.getPresenterId()).append("' ");
         }
         
@@ -495,7 +491,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             if (first) {
                 first = false;
             }
-            sql.append("AND `producerId` = '")
+            sql.append("AND "+DBConstants.p_producerId+" = '")
                     .append(valueObject.getProducerId()).append("' ");
         }
         
@@ -503,25 +499,72 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             if (first) {
                 first = false;
             }
-            sql.append("AND `weekId` = '")
+            sql.append("AND "+DBConstants.p_weekId+" = '")
                     .append(valueObject.getWeekId()).append("' ");
         }
         
-        sql.append("ORDER BY `programSlotId` ASC ");
+        sql.append("ORDER BY "+DBConstants.p_id+" ASC ");
         
         // Prevent accidential full table results.
         // Use loadAll if all rows must be returned.
         if (first)
             searchResults = new ArrayList<>();
         else
-            searchResults = listQuery(connection.prepareStatement(sql
-                    .toString()));
+            searchResults = listQuery(connection.prepareStatement(sql.toString()));
         closeConnection();
         return searchResults;
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#searchMatching(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#searchMatchingWS(sg.edu.nus.iss.phoenix.entity.schedule.WeeklySchedule)
+    */
+    @Override
+    public List<WeeklySchedule> searchMatchingWS(WeeklySchedule valueObject) throws SQLException {
+        
+        @SuppressWarnings("UnusedAssignment")
+                List<WeeklySchedule> searchResults = new ArrayList<>();
+        openConnection();
+        boolean first = true;
+        StringBuilder sql = new StringBuilder(
+                "SELECT * FROM "+DBConstants.wScheduleTableName+" WHERE 1=1 ");
+        
+        if (valueObject.getYear() != null) {
+            if (first) {
+                first = false;
+            }
+            sql.append("AND "+DBConstants.w_year+" = '").append(valueObject.getYear())
+                    .append("' ");
+        }
+        
+        if (valueObject.getStartDate() != null) {
+            if (first) {
+                first = false;
+            }
+            sql.append("AND "+DBConstants.w_startDate+" = '").append(valueObject.getStartDate())
+                    .append("' ");
+        }
+        
+        if (valueObject.getAssignedBy() != null) {
+            if (first) {
+                first = false;
+            }
+            sql.append("AND "+DBConstants.w_assignedBy+" = '")
+                    .append(valueObject.getAssignedBy()).append("' ");
+        }
+        sql.append("ORDER BY "+DBConstants.w_year+" ASC ");
+        
+        // Prevent accidential full table results.
+        // Use loadAll if all rows must be returned.
+        if (first)
+            searchResults = new ArrayList<>();
+        else
+            searchResults = listQueryWS(connection.prepareStatement(sql.toString()));
+        closeConnection();
+        return searchResults;
+    }
+    
+    /* (non-Javadoc)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#searchMatchingAS(sg.edu.nus.iss.phoenix.entity.schedule.AnnualSchedule)
     */
     @Override
     public List<AnnualSchedule> searchMatchingAS(AnnualSchedule valueObject) throws SQLException {
@@ -531,32 +574,31 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         openConnection();
         boolean first = true;
         StringBuilder sql = new StringBuilder(
-                "SELECT * FROM `tblannualschedule` WHERE 1=1 ");
+                "SELECT * FROM "+DBConstants.aScheduleTableName+" WHERE 1=1 ");
         
         if (valueObject.getYear() != null) {
             if (first) {
                 first = false;
             }
-            sql.append("AND `year` LIKE '").append(valueObject.getYear())
-                    .append("%' ");
+            sql.append("AND "+DBConstants.a_year+" = '").append(valueObject.getYear())
+                    .append("' ");
         }
         
         if (valueObject.getAssignedBy() != null) {
             if (first) {
                 first = false;
             }
-            sql.append("AND `AssignedBy` = '")
+            sql.append("AND "+DBConstants.a_assignedBy+" = '")
                     .append(valueObject.getAssignedBy()).append("' ");
-        }        
-        sql.append("ORDER BY `year` ASC ");
+        }
+        sql.append("ORDER BY "+DBConstants.a_year+" ASC ");
         
         // Prevent accidential full table results.
         // Use loadAll if all rows must be returned.
         if (first)
             searchResults = new ArrayList<>();
         else
-            searchResults = listQueryAS(connection.prepareStatement(sql
-                    .toString()));
+            searchResults = listQueryAS(connection.prepareStatement(sql.toString()));
         closeConnection();
         return searchResults;
     }
@@ -606,19 +648,16 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             result = stmt.executeQuery();
             
             if (result.next()) {
-                
-                valueObject.setProgramSlotId(result.getInt("programSlotId"));
-                valueObject.setAssignedBy(result.getString("assignedBy"));
-                valueObject.setDuration(result.getInt("duration"));
-                valueObject.setStartDate(result.getDate("startDate"));
-                valueObject.setProgramName(result.getString("programName"));
-                valueObject.setPresenterId(result.getInt("presenterId"));
-                valueObject.setProducerId(result.getInt("producerId"));
-                valueObject.setWeekId(result.getInt("weekId"));
-                
+                valueObject.setProgramSlotId(result.getInt(DBConstants.p_id));
+                valueObject.setAssignedBy(result.getString(DBConstants.p_assignedBy));
+                valueObject.setDuration(result.getInt(DBConstants.p_duration));
+                valueObject.setStartDate(result.getDate(DBConstants.p_startDate));
+                valueObject.setProgramName(result.getString(DBConstants.p_programName));
+                valueObject.setPresenterId(result.getInt(DBConstants.p_presenterId));
+                valueObject.setProducerId(result.getInt(DBConstants.p_producerId));
+                valueObject.setWeekId(result.getInt(DBConstants.p_weekId));
             } else {
-                // System.out.println("RadioProgram Object Not Found!");
-                throw new NotFoundException("ProgramSlot Object Not Found!");
+                throw new NotFoundException(DBConstants.exc_missing_program_slot);
             }
         }
         catch (SQLException e) {
@@ -656,15 +695,55 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             
             if (result.next()) {
                 
-                valueObjectWS.setWeekId(result.getInt("weekId"));
-                valueObjectWS.setStartDate(result.getDate("startDate"));
-                valueObjectWS.setAssignedBy(result.getString("assignedBy"));
-                valueObjectWS.setProgramSlotId(result.getInt("programSlotId"));
-                valueObjectWS.setYear(result.getString("yearAS"));
+                valueObjectWS.setWeekId(result.getInt(DBConstants.w_weekId));
+                valueObjectWS.setStartDate(result.getDate(DBConstants.w_startDate));
+                valueObjectWS.setAssignedBy(result.getString(DBConstants.w_assignedBy));
+                valueObjectWS.setYear(result.getString(DBConstants.w_year));
                 
             } else {
-                // System.out.println("RadioProgram Object Not Found!");
-                throw new NotFoundException("WeeklySchedule Object Not Found!");
+                throw new NotFoundException(DBConstants.exc_missing_weekly_schedule);
+            }
+        }
+        catch (SQLException e) {
+            throw new DAOException(e);
+        }
+        finally {
+            if (result != null)
+                result.close();
+            if (stmt != null)
+                stmt.close();
+            closeConnection();
+        }
+    }
+    
+    /**
+     * databaseQuery-method. This method is a helper method for internal use. It
+     * will execute all database queries that will return only one row. The
+     * resultset will be converted to valueObject. If no rows were found,
+     * NotFoundException will be thrown.
+     *
+     * @param stmt
+     *            This parameter contains the SQL statement to be executed.
+     * @param valueObjectAS
+     *            Class-instance where resulting data will be stored.
+     * @throws sg.edu.nus.iss.phoenix.core.exceptions.NotFoundException
+     * @throws java.sql.SQLException
+     */
+    protected void singleQueryAS(PreparedStatement stmt, AnnualSchedule valueObjectAS)
+            throws NotFoundException, SQLException {
+        
+        ResultSet result = null;
+        openConnection();
+        try {
+            result = stmt.executeQuery();
+            
+            if (result.next()) {
+                
+                valueObjectAS.setYear(result.getString(DBConstants.a_year));
+                valueObjectAS.setAssignedBy(result.getString(DBConstants.a_assignedBy));
+                
+            } else {
+                throw new NotFoundException(DBConstants.exc_missing_annual_schedule);
             }
         }
         catch (SQLException e) {
@@ -687,7 +766,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
      *
      * @param stmt
      *            This parameter contains the SQL statement to be executed.
-     * @return
+     * @return List<ProgramSlot>
      * @throws java.sql.SQLException
      */
     protected List<ProgramSlot> listQuery(PreparedStatement stmt) throws SQLException {
@@ -701,14 +780,14 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             while (result.next()) {
                 ProgramSlot temp = createValueObjectPS();
                 
-                temp.setProgramSlotId(result.getInt("programSlotId"));
-                temp.setAssignedBy(result.getString("assignedBy"));
-                temp.setDuration(result.getInt("duration"));
-                temp.setStartDate(result.getDate("startDate"));
-                temp.setProgramName(result.getString("programName"));
-                temp.setPresenterId(result.getInt("presenterId"));
-                temp.setProducerId(result.getInt("producerId"));
-                temp.setWeekId(result.getInt("weekId"));
+                temp.setProgramSlotId(result.getInt(DBConstants.p_id));
+                temp.setAssignedBy(result.getString(DBConstants.p_assignedBy));
+                temp.setDuration(result.getInt(DBConstants.p_duration));
+                temp.setStartDate(result.getDate(DBConstants.p_startDate));
+                temp.setProgramName(result.getString(DBConstants.p_programName));
+                temp.setPresenterId(result.getInt(DBConstants.p_presenterId));
+                temp.setProducerId(result.getInt(DBConstants.p_producerId));
+                temp.setWeekId(result.getInt(DBConstants.p_weekId));
                 
                 searchResults.add(temp);
             }
@@ -736,7 +815,52 @@ public class ScheduleDAOImpl implements ScheduleDAO {
      *
      * @param stmt
      *            This parameter contains the SQL statement to be executed.
-     * @return
+     * @return List<WeeklySchedule>
+     * @throws java.sql.SQLException
+     */
+    protected List<WeeklySchedule> listQueryWS(PreparedStatement stmt) throws SQLException {
+        
+        ArrayList<WeeklySchedule> searchResults = new ArrayList<>();
+        ResultSet result = null;
+        openConnection();
+        try {
+            result = stmt.executeQuery();
+            
+            while (result.next()) {
+                WeeklySchedule temp = createValueObjectWS();
+                
+                temp.setWeekId(result.getInt(DBConstants.w_weekId));
+                temp.setYear(result.getString(DBConstants.w_year));
+                temp.setStartDate(result.getDate(DBConstants.w_startDate));
+                temp.setAssignedBy(result.getString(DBConstants.w_assignedBy));
+                
+                searchResults.add(temp);
+            }
+            
+        }
+        catch (SQLException e) {
+            throw new DAOException(e);
+        }
+        finally {
+            if (result != null)
+                result.close();
+            if (stmt != null)
+                stmt.close();
+            closeConnection();
+        }
+        
+        return (List<WeeklySchedule>) searchResults;
+    }
+    
+    /**
+     * databaseQuery-method. This method is a helper method for internal use. It
+     * will execute all database queries that will return multiple rows. The
+     * resultset will be converted to the List of valueObjects. If no rows were
+     * found, an empty List will be returned.
+     *
+     * @param stmt
+     *            This parameter contains the SQL statement to be executed.
+     * @return List<AnnualSchedule>
      * @throws java.sql.SQLException
      */
     protected List<AnnualSchedule> listQueryAS(PreparedStatement stmt) throws SQLException {
@@ -750,8 +874,8 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             while (result.next()) {
                 AnnualSchedule temp = createValueObjectAS();
                 
-                temp.setYear(result.getString("year"));
-                temp.setAssignedBy(result.getString("assignedBy"));
+                temp.setYear(result.getString(DBConstants.a_year));
+                temp.setAssignedBy(result.getString(DBConstants.a_assignedBy));
                 
                 searchResults.add(temp);
             }

@@ -20,7 +20,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
 import sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot;
 import sg.edu.nus.iss.phoenix.entity.schedule.AnnualSchedule;
-//import sg.edu.nus.iss.phoenix.restful.schedule.AnnualSchedules;
+import sg.edu.nus.iss.phoenix.entity.schedule.WeeklySchedule;
 import sg.edu.nus.iss.phoenix.service.ScheduleService;
 
 /**
@@ -61,17 +61,50 @@ public class ScheduleRESTService {
         return asList;
     }
     
+    /**
+     * Retrieves representation of an instance of resource
+     * @return an instance of resource
+     */
+    @GET
+    @Path("/annual/{year}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public AnnualSchedule getAnnualSchedule(@PathParam("year") String year) {
+        AnnualSchedule as = new AnnualSchedule();
+        as = service.findAS(year);
+        return as;
+    }
     
     /**
      * Retrieves representation of an instance of resource
      * @return an instance of resource
      */
     @GET
-    @Path("/{programSlotId}")
+    @Path("/weekly/{year}")
     @Produces(MediaType.APPLICATION_JSON)
-    public ProgramSlot getProgramSlot(@PathParam("programSlotId") int programSlotId) {
+    public AnnualSchedules getAllWeeklySchedules(@PathParam("year") String year) {
+        ArrayList<WeeklySchedule> wslist = service.findAllWS(year);
+        AnnualSchedules wsList = new AnnualSchedules();
+        wsList.setWsList(new ArrayList<WeeklySchedule>());
+        
+        for (int i = 0; i < wslist.size(); i++) {
+            wsList.getWsList().add(
+                new WeeklySchedule(wslist.get(i).getWeekId(),wslist.get(i).getStartDate(),
+                        wslist.get(i).getAssignedBy(),wslist.get(i).getYear()));
+        }
+
+        return wsList;
+    }
+    
+    /**
+     * Retrieves representation of an instance of resource
+     * @return an instance of resource
+     */
+    @GET
+    @Path("/{weekId}")
+    @Produces(MediaType.APPLICATION_JSON)
+    public ProgramSlot getProgramSlot(@PathParam("weekId") int weekId) {
         ProgramSlot ps = new ProgramSlot();
-        ps = service.findPS(programSlotId);
+        ps = service.findPS(weekId);
         return ps;
     }
     
