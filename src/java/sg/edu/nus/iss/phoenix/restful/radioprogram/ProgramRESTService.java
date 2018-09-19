@@ -50,10 +50,14 @@ public class ProgramRESTService {
      * @return an instance of resource
      */
     @GET
+    @Path("/{name}")
     @Produces(MediaType.APPLICATION_JSON)
-    public RadioProgram getRadioProgram() {
+    public RadioProgram getRadioProgram(@PathParam("name") String name) {
+        RadioProgram rp = new RadioProgram();
+        rp = service.findRP(name);
+        return rp; 
         //TODO return proper representation object
-        throw new UnsupportedOperationException();
+        //throw new UnsupportedOperationException();
     }
     @GET
     @Path("/all")
