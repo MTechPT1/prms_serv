@@ -45,7 +45,7 @@ public class UserRESTService {
     }
     
     @GET
-    @Path("{user_id")
+    @Path("{user_id}")
     @Produces(MediaType.APPLICATION_JSON)
     public Response getUser(@PathParam("user_id") String userId) {
         return service.getUser(userId);
