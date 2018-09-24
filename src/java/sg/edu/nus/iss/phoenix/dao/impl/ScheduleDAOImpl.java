@@ -197,7 +197,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             sql = "INSERT INTO "+DBConstants.wScheduleTableName+" ("+DBConstants.w_weekId+","+DBConstants.w_startDate+","+DBConstants.w_assignedBy+","+DBConstants.w_year+") VALUES (?,?,?,?); ";
             stmt = connection.prepareStatement(sql);
             stmt.setInt(1, valueObjectWS.getWeekId());
-            stmt.setDate(2, valueObjectWS.getStartDate());
+            stmt.setString(2, valueObjectWS.getStartDate());
             stmt.setString(3, valueObjectWS.getAssignedBy());
             stmt.setString(4, valueObjectWS.getYear());
             int rowcount = databaseUpdate(stmt);
@@ -292,15 +292,15 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             stmt = connection.prepareStatement(sql);
             stmt.setString(1, valueObject.getAssignedBy());
             stmt.setInt(2, valueObject.getDuration());
-            stmt.setDate(3, valueObject.getStartDate());
+            stmt.setString(3, valueObject.getStartDate());
             stmt.setString(4, valueObject.getProgramName());
-            stmt.setInt(5, valueObject.getPresenterId());
-            stmt.setInt(6, valueObject.getProducerId());
+            stmt.setString(5, valueObject.getPresenterId());
+            stmt.setString(6, valueObject.getProducerId());
             stmt.setInt(7, valueObject.getWeekId());
             int rowcount = databaseUpdate(stmt);
             if (rowcount != 1) {
                 throw new SQLException(DBConstants.exc_duplicate_primary_key);
-            }            
+            }
         } finally {
             if (stmt != null)
                 stmt.close();
@@ -325,10 +325,10 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             stmt = connection.prepareStatement(sql);
             stmt.setString(1, valueObject.getAssignedBy());
             stmt.setInt(2, valueObject.getDuration());
-            stmt.setDate(3, valueObject.getStartDate());
+            stmt.setString(3, valueObject.getStartDate());
             stmt.setString(4, valueObject.getProgramName());
-            stmt.setInt(5, valueObject.getPresenterId());
-            stmt.setInt(6, valueObject.getProducerId());
+            stmt.setString(5, valueObject.getPresenterId());
+            stmt.setString(6, valueObject.getProducerId());
             stmt.setInt(7, valueObject.getWeekId());
             stmt.setInt(8, valueObject.getProgramSlotId());
             
@@ -430,6 +430,41 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#searchMatching(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
     */
     @Override
+    public List<ProgramSlot> searchMatchingDates(int weekId, String startDate, String endDate) throws SQLException {
+        
+        @SuppressWarnings("UnusedAssignment")
+                List<ProgramSlot> searchResults = new ArrayList<>();
+        openConnection();
+        boolean first = true;
+        StringBuilder sql = new StringBuilder("SELECT * FROM "+DBConstants.scheduleTableName+" WHERE ");
+                        
+        if (startDate!=null) {
+            if (endDate!=null) {
+                if (first) {
+                    first=false;
+                    sql.append(DBConstants.p_startDate+">='"+startDate+"' AND "+DBConstants.p_startDate+"<='"+endDate+"'");                    
+                }
+            }
+        }        
+        if (weekId!=0) 
+           sql.append(" AND "+DBConstants.p_weekId+"="+weekId);
+            
+        sql.append(" ORDER BY "+DBConstants.p_id+" ASC ");
+        // Prevent accidential full table results.
+        // Use loadAll if all rows must be returned.
+        if (first)
+            searchResults = new ArrayList<>();
+        else
+            searchResults = listQuery(connection.prepareStatement(sql.toString()));
+        closeConnection();
+        return searchResults;
+    }
+    
+    
+    /* (non-Javadoc)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#searchMatching(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
+    */
+    @Override
     public List<ProgramSlot> searchMatching(ProgramSlot valueObject) throws SQLException {
         
         @SuppressWarnings("UnusedAssignment")
@@ -479,7 +514,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                     .append(valueObject.getProgramName()).append("' ");
         }
         
-        if (valueObject.getPresenterId() != 0) {
+        if (valueObject.getPresenterId() != null) {
             if (first) {
                 first = false;
             }
@@ -487,7 +522,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                     .append(valueObject.getPresenterId()).append("' ");
         }
         
-        if (valueObject.getProducerId() != 0) {
+        if (valueObject.getProducerId() != null) {
             if (first) {
                 first = false;
             }
@@ -651,10 +686,10 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                 valueObject.setProgramSlotId(result.getInt(DBConstants.p_id));
                 valueObject.setAssignedBy(result.getString(DBConstants.p_assignedBy));
                 valueObject.setDuration(result.getInt(DBConstants.p_duration));
-                valueObject.setStartDate(result.getDate(DBConstants.p_startDate));
+                valueObject.setStartDate(result.getString(DBConstants.p_startDate));
                 valueObject.setProgramName(result.getString(DBConstants.p_programName));
-                valueObject.setPresenterId(result.getInt(DBConstants.p_presenterId));
-                valueObject.setProducerId(result.getInt(DBConstants.p_producerId));
+                valueObject.setPresenterId(result.getString(DBConstants.p_presenterId));
+                valueObject.setProducerId(result.getString(DBConstants.p_producerId));
                 valueObject.setWeekId(result.getInt(DBConstants.p_weekId));
             } else {
                 throw new NotFoundException(DBConstants.exc_missing_program_slot);
@@ -696,7 +731,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             if (result.next()) {
                 
                 valueObjectWS.setWeekId(result.getInt(DBConstants.w_weekId));
-                valueObjectWS.setStartDate(result.getDate(DBConstants.w_startDate));
+                valueObjectWS.setStartDate(result.getString(DBConstants.w_startDate));
                 valueObjectWS.setAssignedBy(result.getString(DBConstants.w_assignedBy));
                 valueObjectWS.setYear(result.getString(DBConstants.w_year));
                 
@@ -783,10 +818,10 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                 temp.setProgramSlotId(result.getInt(DBConstants.p_id));
                 temp.setAssignedBy(result.getString(DBConstants.p_assignedBy));
                 temp.setDuration(result.getInt(DBConstants.p_duration));
-                temp.setStartDate(result.getDate(DBConstants.p_startDate));
+                temp.setStartDate(result.getString(DBConstants.p_startDate));
                 temp.setProgramName(result.getString(DBConstants.p_programName));
-                temp.setPresenterId(result.getInt(DBConstants.p_presenterId));
-                temp.setProducerId(result.getInt(DBConstants.p_producerId));
+                temp.setPresenterId(result.getString(DBConstants.p_presenterId));
+                temp.setProducerId(result.getString(DBConstants.p_producerId));
                 temp.setWeekId(result.getInt(DBConstants.p_weekId));
                 
                 searchResults.add(temp);
@@ -831,7 +866,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                 
                 temp.setWeekId(result.getInt(DBConstants.w_weekId));
                 temp.setYear(result.getString(DBConstants.w_year));
-                temp.setStartDate(result.getDate(DBConstants.w_startDate));
+                temp.setStartDate(result.getString(DBConstants.w_startDate));
                 temp.setAssignedBy(result.getString(DBConstants.w_assignedBy));
                 
                 searchResults.add(temp);

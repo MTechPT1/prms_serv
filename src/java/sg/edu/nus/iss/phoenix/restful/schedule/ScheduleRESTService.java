@@ -100,22 +100,25 @@ public class ScheduleRESTService {
      * @return an instance of resource
      */
     @GET
-    @Path("/{weekId}")
+    @Path("/{programSlotId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public ProgramSlot getProgramSlot(@PathParam("weekId") int weekId) {
+    public ProgramSlot getProgramSlot(@PathParam("programSlotId") int programSlotId) {
         ProgramSlot ps = new ProgramSlot();
-        ps = service.findPS(weekId);
+        ps = service.findPS(programSlotId);
         return ps;
     }
     
+    /**
+     * Retrieves representation of an instance of resource
+     * @return an instance of resource
+     */
     @GET
-    @Path("/all")
+    @Path("/{weekId}/{year}")
     @Produces(MediaType.APPLICATION_JSON)
-    public AnnualSchedules getAllProgramSlots() {
-        ArrayList<ProgramSlot> pslist = service.findAllPS();
+    public AnnualSchedules getProgramSlots(@PathParam("weekId") int weekId, @PathParam("year") String year) {
+        ArrayList<ProgramSlot> pslist = service.findPSByDates(weekId, year);
         AnnualSchedules psList = new AnnualSchedules();
-        psList.setPsList(new ArrayList<ProgramSlot>());
-        
+        psList.setPsList(new ArrayList<>()); 
         for (int i = 0; i < pslist.size(); i++) {
             psList.getPsList().add(
                 new ProgramSlot(pslist.get(i).getProgramSlotId(), 
@@ -127,7 +130,27 @@ public class ScheduleRESTService {
                     pslist.get(i).getProducerId(),
                     pslist.get(i).getWeekId()));
         }
-
+        return psList;
+    }
+    
+    @GET
+    @Path("/all")
+    @Produces(MediaType.APPLICATION_JSON)
+    public AnnualSchedules getAllProgramSlots() {
+        ArrayList<ProgramSlot> pslist = service.findAllPS();
+        AnnualSchedules psList = new AnnualSchedules();
+        psList.setPsList(new ArrayList<>()); 
+        for (int i = 0; i < pslist.size(); i++) {
+            psList.getPsList().add(
+                new ProgramSlot(pslist.get(i).getProgramSlotId(), 
+                    pslist.get(i).getAssignedBy(), 
+                    pslist.get(i).getDuration(),
+                    pslist.get(i).getStartDate(),
+                    pslist.get(i).getProgramName(),
+                    pslist.get(i).getPresenterId(),
+                    pslist.get(i).getProducerId(),
+                    pslist.get(i).getWeekId()));
+        }
         return psList;
     }
     
