@@ -288,6 +288,24 @@ public interface ScheduleDAO {
     public abstract int countAll() throws SQLException;
     
     /**
+     * searchMatchingDates-Method. This method provides searching capability to get
+     * matching valueObjects from database. It works by searching all objects
+     * that match permanent instance variables of given object. Upper layer
+     * should use this by setting some parameters in valueObject and then call
+     * searchMatching. The result will be 0-N objects in a List, all matching
+     * those criteria you specified. Those instance-variables that have NULL
+     * values are excluded in search-criteria.
+     *
+     * @param startDate, endDate
+     *            This parameter contains the class instance where search will
+     *            be based. Primary-key field should not be set.
+     * @return List<ProgramSlot>
+     * @throws java.sql.SQLException
+     */
+    public abstract List<ProgramSlot> searchMatchingDates(int weekId, String startDate, String endDate)
+            throws SQLException;
+    
+    /**
      * searchMatching-Method. This method provides searching capability to get
      * matching valueObjects from database. It works by searching all objects
      * that match permanent instance variables of given object. Upper layer

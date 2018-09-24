@@ -6,7 +6,6 @@
 package sg.edu.nus.iss.phoenix.entity.schedule;
 
 import java.io.Serializable;
-import java.sql.Date;
 
 /**
  *
@@ -21,10 +20,10 @@ public class ProgramSlot implements Cloneable, Serializable {
     private int programSlotId;
     private String assignedBy;
     private int duration;  //does this belong to raad program?
-    private Date startDate;
+    private String startDate;
     private String programName;
-    int presenterId;
-    int producerId;
+    String presenterId;
+    String producerId;
     int weekId;
     /** 
      * Constructors. 
@@ -40,7 +39,7 @@ public class ProgramSlot implements Cloneable, Serializable {
           this.programSlotId = programSlotId;
     }
     
-    public ProgramSlot (int programSlotId, String assignedBy, int duration, Date startDate, String programName, int presenterId, int producerId, int weekId) {
+    public ProgramSlot (int programSlotId, String assignedBy, int duration, String startDate, String programName, String presenterId, String producerId, int weekId) {
         this.programSlotId = programSlotId;
         this.assignedBy = assignedBy;
         this.duration = duration;
@@ -81,11 +80,11 @@ public class ProgramSlot implements Cloneable, Serializable {
         this.duration = duration;
     }
     
-    public Date getStartDate() {
+    public String getStartDate() {
         return this.startDate;
     }
     
-    public void setStartDate(Date startDate) {
+    public void setStartDate(String startDate) {
         this.startDate = startDate;
     }
     
@@ -97,19 +96,19 @@ public class ProgramSlot implements Cloneable, Serializable {
         this.programName = programName;
     }
     
-    public int getPresenterId() {
+    public String getPresenterId() {
         return this.presenterId;
     }
     
-    public void setPresenterId(int presenterId) {
+    public void setPresenterId(String presenterId) {
         this.presenterId = presenterId;
     }
     
-    public int getProducerId() {
+    public String getProducerId() {
         return this.producerId;
     }
     
-    public void setProducerId(int producerId) {
+    public void setProducerId(String producerId) {
         this.producerId = producerId;
     }
     
@@ -136,7 +135,7 @@ public class ProgramSlot implements Cloneable, Serializable {
      * @param producerId
      */
 
-    public void setAll(int programSlotId, String assignedBy, int duration, Date startDate, String programName, int presenterId, int producerId, int weekId) {
+    public void setAll(int programSlotId, String assignedBy, int duration, String startDate, String programName, String presenterId, String producerId, int weekId) {
         this.programSlotId = programSlotId;
         this.assignedBy = assignedBy;
         this.duration = duration;

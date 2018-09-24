@@ -6,7 +6,6 @@
 package sg.edu.nus.iss.phoenix.entity.schedule;
 
 import java.io.Serializable;
-import java.sql.Date;
 /**
  *
  * @author Karen Athaide
@@ -18,7 +17,7 @@ public class WeeklySchedule implements Cloneable, Serializable {
      * mapped to the columns of database table.
      */
     private int weekId;
-    private Date startDate;
+    private String startDate;
     private String assignedBy;
     private String year;
     
@@ -36,7 +35,7 @@ public class WeeklySchedule implements Cloneable, Serializable {
         this.weekId = weekId;
     }
     
-    public WeeklySchedule(int weekId, Date startDate, String assignedBy, String year) {
+    public WeeklySchedule(int weekId, String startDate, String assignedBy, String year) {
         this.weekId = weekId;
         this.startDate = startDate;
         this.assignedBy = assignedBy;
@@ -57,11 +56,11 @@ public class WeeklySchedule implements Cloneable, Serializable {
         this.weekId = weekId;
     }
     
-    public Date getStartDate() {
+    public String getStartDate() {
         return startDate;
     }
       
-    public void setStartDate(Date startDate) {
+    public void setStartDate(String startDate) {
         this.startDate = startDate;
     } 
     
