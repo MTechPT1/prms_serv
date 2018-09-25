@@ -6,7 +6,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -117,13 +116,16 @@ public class UserDaoImpl implements UserDao {
 		PreparedStatement stmt = null;
 		try {
 			sql = "INSERT INTO user ( id, password, name, "
-					+ "role) VALUES (?, ?, ?, ?) ";
+					+ "role, joinDate) VALUES (?, ?, ?, ?, ?) ";
 			stmt = this.connection.prepareStatement(sql);
 
 			stmt.setString(1, valueObject.getId());
 			stmt.setString(2, valueObject.getPassword());
 			stmt.setString(3, valueObject.getName());
-			stmt.setString(4, valueObject.getRoles().get(0).getRole());
+                        
+                        String roles = consolidateRoles(valueObject.getRoles());
+			stmt.setString(4, roles);
+                        stmt.setString(5, valueObject.getJoinDate());
 
 			int rowcount = databaseUpdate(stmt);
 			if (rowcount != 1) {
@@ -148,16 +150,19 @@ public class UserDaoImpl implements UserDao {
 	@Override
 	public void save(User valueObject) throws NotFoundException, SQLException {
 
-		String sql = "UPDATE user SET password = ?, name = ?, role = ? WHERE (id = ? ) ";
+		String sql = "UPDATE user SET password = ?, name = ?, role = ? , joinDate = ? WHERE (id = ? ) ";
 		PreparedStatement stmt = null;
 
 		try {
 			stmt = this.connection.prepareStatement(sql);
 			stmt.setString(1, valueObject.getPassword());
 			stmt.setString(2, valueObject.getName());
-			stmt.setString(3, valueObject.getRoles().get(0).getRole());
+                        
+                        String roles = consolidateRoles(valueObject.getRoles());
+			stmt.setString(3, roles);
 
-			stmt.setString(4, valueObject.getId());
+                        stmt.setString(4, valueObject.getJoinDate());
+			stmt.setString(5, valueObject.getId());
 
 			int rowcount = databaseUpdate(stmt);
 			if (rowcount == 0) {
@@ -375,6 +380,7 @@ public class UserDaoImpl implements UserDao {
 				valueObject.setPassword(result.getString("password"));
 				valueObject.setName(result.getString("name"));
 				valueObject.setRoles(createRoles(result.getString("role")));
+                                valueObject.setJoinDate(result.getString("joinDate"));
 				//Role e = new Role(result.getString("role"));
 				//ArrayList<Role> roles = new ArrayList<Role>();
 				//roles.add(e);
@@ -413,6 +419,7 @@ public class UserDaoImpl implements UserDao {
 				temp.setPassword(result.getString("password"));
 				temp.setName(result.getString("name"));
 				temp.setRoles(createRoles(result.getString("role")));
+                                temp.setJoinDate(result.getString("joinDate"));
 				//Role e = new Role(result.getString("role"));
 				//ArrayList<Role> roles = new ArrayList<Role>();
 				//roles.add(e);
@@ -452,4 +459,15 @@ public class UserDaoImpl implements UserDao {
 		}
 		return conn;
 	}
+
+    private String consolidateRoles(List<Role> roles) {
+        List<String> rolesStr = new ArrayList<String>();
+        for (Role role : roles) {
+            rolesStr.add(role.getRole());
+        }
+        
+        String result = String.join(DELIMITER, rolesStr);
+        
+        return result;
+    }
 }

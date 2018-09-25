@@ -34,6 +34,9 @@ public class User implements Cloneable, Serializable {
     @JsonProperty("password")
     private String password;
     
+    @JsonProperty("join_date")
+    private String joinDate;
+    
     @JsonProperty("roles")
     private List<Role> roles = new ArrayList<Role>();
 
@@ -76,6 +79,16 @@ public class User implements Cloneable, Serializable {
     @JsonProperty("password")
     public void setPassword(String passwordIn) {
         this.password = passwordIn;
+    }
+    
+    @JsonProperty("join_date")
+    public String getJoinDate() {
+        return this.joinDate;
+    }
+    
+    @JsonProperty("join_date")
+    public void setJoinDate(String joinDate) {
+        this.joinDate = joinDate;
     }
 
     @JsonProperty("name")
