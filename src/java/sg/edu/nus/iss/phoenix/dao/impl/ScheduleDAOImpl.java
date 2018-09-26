@@ -6,14 +6,16 @@
 package sg.edu.nus.iss.phoenix.dao.impl;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import sg.edu.nus.iss.phoenix.core.dao.DBConstants;
+import sg.edu.nus.iss.phoenix.core.dao.DataAccess;
 import sg.edu.nus.iss.phoenix.core.exceptions.NotFoundException;
 import sg.edu.nus.iss.phoenix.core.exceptions.DAOException;
 import sg.edu.nus.iss.phoenix.dao.ScheduleDAO;
@@ -29,7 +31,7 @@ import sg.edu.nus.iss.phoenix.entity.schedule.AnnualSchedule;
  */
 public class ScheduleDAOImpl implements ScheduleDAO {
     
-    Connection connection;
+    DataAccess dataAccess = new DataAccess();
     
     /* (non-Javadoc)
     * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createValueObject()
@@ -65,9 +67,9 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         
         String sql = "SELECT * FROM "+DBConstants.aScheduleTableName+" WHERE ("+DBConstants.a_year+" = ? ); ";
         PreparedStatement stmt = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
-            stmt = connection.prepareStatement(sql);
+            stmt = dataAccess.getConnection().prepareStatement(sql);
             stmt.setString(1, valueObjectAS.getYear());
             
             singleQueryAS(stmt, valueObjectAS);
@@ -75,7 +77,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         } finally {
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
     }
     
@@ -88,10 +90,10 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         
         String sql = "";
         PreparedStatement stmt = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
             sql = "INSERT INTO "+DBConstants.aScheduleTableName+" ("+DBConstants.a_year+","+DBConstants.a_assignedBy+") VALUES (?,?); ";
-            stmt = connection.prepareStatement(sql);
+            stmt = dataAccess.getConnection().prepareStatement(sql);
             stmt.setString(1, valueObjectAS.getYear());
             stmt.setString(2, valueObjectAS.getAssignedBy());
             int rowcount = databaseUpdate(stmt);
@@ -101,7 +103,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         } finally {
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
         
     }
@@ -111,11 +113,11 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     */
     @Override
     public List<AnnualSchedule> loadAllAS() throws SQLException {
-        openConnection();
+        dataAccess.openConnection();
         String sql = "SELECT * FROM "+DBConstants.aScheduleTableName+" ORDER BY "+DBConstants.a_year+" ASC; ";
-        List<AnnualSchedule> searchResults = listQueryAS(connection
+        List<AnnualSchedule> searchResults = listQueryAS(dataAccess.getConnection()
                 .prepareStatement(sql));
-        closeConnection();
+        dataAccess.closeConnection();
         System.out.println("record size"+searchResults.size());
         return searchResults;
     }
@@ -125,12 +127,12 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     */
     @Override
     public List<WeeklySchedule> loadAllWS(String year) throws SQLException {
-        openConnection();
+        dataAccess.openConnection();
         String sql = "SELECT * FROM "+DBConstants.wScheduleTableName+" WHERE "+DBConstants.w_year+" LIKE "+year
                 +" ORDER BY "+DBConstants.w_year+" ASC; ";
-        List<WeeklySchedule> searchResults = listQueryWS(connection
+        List<WeeklySchedule> searchResults = listQueryWS(dataAccess.getConnection()
                 .prepareStatement(sql));
-        closeConnection();
+        dataAccess.closeConnection();
         System.out.println("record size"+searchResults.size());
         return searchResults;
     }
@@ -169,9 +171,9 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         
         String sql = "SELECT * FROM "+DBConstants.wScheduleTableName+" WHERE ("+DBConstants.w_year+" = ? ); ";
         PreparedStatement stmt = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
-            stmt = connection.prepareStatement(sql);
+            stmt = dataAccess.getConnection().prepareStatement(sql);
             stmt.setInt(1, valueObjectWS.getWeekId());
             
             singleQueryWS(stmt, valueObjectWS);
@@ -179,37 +181,8 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         } finally {
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
-    }
-    
-    /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createWS(sg.edu.nus.iss.phoenix.entity.schedule.WeeklySchedule)
-    */
-    @Override
-    public synchronized void createWS(WeeklySchedule valueObjectWS)
-            throws SQLException {
-        
-        String sql = "";
-        PreparedStatement stmt = null;
-        openConnection();
-        try {
-            sql = "INSERT INTO "+DBConstants.wScheduleTableName+" ("+DBConstants.w_weekId+","+DBConstants.w_startDate+","+DBConstants.w_assignedBy+","+DBConstants.w_year+") VALUES (?,?,?,?); ";
-            stmt = connection.prepareStatement(sql);
-            stmt.setInt(1, valueObjectWS.getWeekId());
-            stmt.setString(2, valueObjectWS.getStartDate());
-            stmt.setString(3, valueObjectWS.getAssignedBy());
-            stmt.setString(4, valueObjectWS.getYear());
-            int rowcount = databaseUpdate(stmt);
-            if (rowcount != 1) {
-                throw new SQLException(DBConstants.exc_duplicate_primary_key);
-            }
-        } finally {
-            if (stmt != null)
-                stmt.close();
-            closeConnection();
-        }
-        
     }
     
     /* (non-Javadoc)
@@ -246,9 +219,9 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         
         String sql = "SELECT * FROM "+DBConstants.scheduleTableName+" WHERE ("+DBConstants.p_id+" = ? ); ";
         PreparedStatement stmt = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
-            stmt = connection.prepareStatement(sql);
+            stmt = dataAccess.getConnection().prepareStatement(sql);
             stmt.setInt(1, valueObject.getProgramSlotId());
             
             singleQueryPS(stmt, valueObject);
@@ -256,7 +229,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         } finally {
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
     }
     
@@ -265,14 +238,80 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     */
     @Override
     public List<ProgramSlot> loadAll() throws SQLException {
-        openConnection();
+        dataAccess.openConnection();
         String sql = "SELECT * FROM "+DBConstants.scheduleTableName+" ORDER BY "+DBConstants.p_id+" ASC; ";
-        List<ProgramSlot> searchResults = listQuery(connection
+        List<ProgramSlot> searchResults = listQuery(dataAccess.getConnection()
                 .prepareStatement(sql));
-        closeConnection();
+        dataAccess.closeConnection();
         System.out.println("record size"+searchResults.size());
         return searchResults;
     }
+    
+    private Boolean populateAnnualWeekly(ProgramSlot ps) throws ParseException, SQLException {
+        Boolean first = false;
+        Calendar cal = Calendar.getInstance();
+        
+        java.util.Date dt = new java.util.Date();
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        try {
+            dt = sdf.parse(ps.getStartDate());
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+        }
+        cal.setTime(dt);
+        int year = cal.get(Calendar.YEAR);
+        try {
+            AnnualSchedule currentas = new AnnualSchedule();
+            currentas.setYear(Integer.toString(year));
+            if (searchMatchingAS(currentas).isEmpty()) {
+                first=true;
+                //populate annual schedule
+                AnnualSchedule as = new AnnualSchedule(Integer.toString(year),ps.getAssignedBy());
+                createAS(as);
+                
+                cal.set(year, 0, 1);
+                sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
+                //populate weekly schedule
+                for (int i=1; i<53; i++) {
+                    String date=sdf.format(cal.getTime());
+                    WeeklySchedule ws = new WeeklySchedule(i,date,ps.getAssignedBy(),Integer.toString(year));
+                    createWS(ws);
+                    cal.add(Calendar.WEEK_OF_YEAR, 1);
+                }
+                first=false;
+            }
+        }catch (SQLException e) {
+            // TODO Auto-generated catch block
+            throw new DAOException(e);
+        }
+        return first;
+    }
+    
+    private Boolean isProgramSlotAssigned(ProgramSlot ps) throws ParseException, SQLException {
+        ArrayList<ProgramSlot> currentList = new ArrayList<ProgramSlot>();
+        try {
+            String startDate=ps.getStartDate();
+            Calendar cal = Calendar.getInstance();
+            java.util.Date dt = new java.util.Date();
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            try {
+                dt = sdf.parse(ps.getStartDate());
+            } catch (ParseException ex) {
+                ex.printStackTrace();
+            }
+            cal.setTime(dt);
+            cal.add(Calendar.MINUTE, ps.getDuration());
+            String endDate=sdf.format(cal.getTime());
+            currentList = (ArrayList<ProgramSlot>) searchMatchingDates(0,startDate,endDate);
+        } catch (SQLException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        if (!currentList.isEmpty())
+            return true;
+        return false;
+    }
+    
     
     /* (non-Javadoc)
     * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createPS(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
@@ -281,22 +320,58 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     public synchronized void createPS(ProgramSlot valueObject)
             throws SQLException {
         
+        try {
+            if (!populateAnnualWeekly(valueObject)) {
+                if (!isProgramSlotAssigned(valueObject)) {
+                    String sql = "";
+                    PreparedStatement stmt = null;
+                    dataAccess.openConnection();
+                    try {
+                        //create a program slot
+                        sql = "INSERT INTO "+DBConstants.scheduleTableName+" ("+DBConstants.p_assignedBy+","
+                                +DBConstants.p_duration+","+DBConstants.p_startDate+","+DBConstants.p_programName+","
+                                +DBConstants.p_presenterId+","+DBConstants.p_producerId+","+DBConstants.p_weekId+") VALUES (?,?,?,?,?,?,?); ";
+                        stmt = dataAccess.getConnection().prepareStatement(sql);
+                        stmt.setString(1, valueObject.getAssignedBy());
+                        stmt.setInt(2, valueObject.getDuration());
+                        stmt.setString(3, valueObject.getStartDate());
+                        stmt.setString(4, valueObject.getProgramName());
+                        stmt.setString(5, valueObject.getPresenterId());
+                        stmt.setString(6, valueObject.getProducerId());
+                        stmt.setInt(7, valueObject.getWeekId());
+                        int rowcount = databaseUpdate(stmt);
+                        if (rowcount != 1) {
+                            throw new SQLException(DBConstants.exc_duplicate_primary_key);
+                        }
+                    } finally {
+                        if (stmt != null)
+                            stmt.close();
+                        dataAccess.closeConnection();
+                    }
+                }
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    /* (non-Javadoc)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#createWS(sg.edu.nus.iss.phoenix.entity.schedule.WeeklySchedule)
+    */
+    @Override
+    public synchronized void createWS(WeeklySchedule valueObjectWS)
+            throws SQLException {
+        
         String sql = "";
         PreparedStatement stmt = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
-            //create a program slot
-            sql = "INSERT INTO "+DBConstants.scheduleTableName+" ("+DBConstants.p_assignedBy+","
-                    +DBConstants.p_duration+","+DBConstants.p_startDate+","+DBConstants.p_programName+","
-                    +DBConstants.p_presenterId+","+DBConstants.p_producerId+","+DBConstants.p_weekId+") VALUES (?,?,?,?,?,?,?); ";
-            stmt = connection.prepareStatement(sql);
-            stmt.setString(1, valueObject.getAssignedBy());
-            stmt.setInt(2, valueObject.getDuration());
-            stmt.setString(3, valueObject.getStartDate());
-            stmt.setString(4, valueObject.getProgramName());
-            stmt.setString(5, valueObject.getPresenterId());
-            stmt.setString(6, valueObject.getProducerId());
-            stmt.setInt(7, valueObject.getWeekId());
+            sql = "INSERT INTO "+DBConstants.wScheduleTableName+" ("+DBConstants.w_weekId+","+DBConstants.w_startDate+","+DBConstants.w_assignedBy+","+DBConstants.w_year+") VALUES (?,?,?,?); ";
+            stmt = dataAccess.getConnection().prepareStatement(sql);
+            stmt.setInt(1, valueObjectWS.getWeekId());
+            stmt.setString(2, valueObjectWS.getStartDate());
+            stmt.setString(3, valueObjectWS.getAssignedBy());
+            stmt.setString(4, valueObjectWS.getYear());
             int rowcount = databaseUpdate(stmt);
             if (rowcount != 1) {
                 throw new SQLException(DBConstants.exc_duplicate_primary_key);
@@ -304,7 +379,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         } finally {
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
         
     }
@@ -315,34 +390,39 @@ public class ScheduleDAOImpl implements ScheduleDAO {
     @Override
     public void save(ProgramSlot valueObject) throws NotFoundException,
             SQLException {
-        
-        String sql = "UPDATE "+DBConstants.scheduleTableName+" SET "+DBConstants.p_assignedBy+" = ?, "+DBConstants.p_duration+" = ?, "
-                +DBConstants.p_startDate+" = ?, "+DBConstants.p_programName+" = ?, "+DBConstants.p_presenterId+" = ?, "
-                +DBConstants.p_producerId+" = ?, "+DBConstants.p_weekId+" = ? WHERE ("+DBConstants.p_id+" = ? ); ";
-        PreparedStatement stmt = null;
-        openConnection();
         try {
-            stmt = connection.prepareStatement(sql);
-            stmt.setString(1, valueObject.getAssignedBy());
-            stmt.setInt(2, valueObject.getDuration());
-            stmt.setString(3, valueObject.getStartDate());
-            stmt.setString(4, valueObject.getProgramName());
-            stmt.setString(5, valueObject.getPresenterId());
-            stmt.setString(6, valueObject.getProducerId());
-            stmt.setInt(7, valueObject.getWeekId());
-            stmt.setInt(8, valueObject.getProgramSlotId());
-            
-            int rowcount = databaseUpdate(stmt);
-            if (rowcount == 0) {
-                throw new NotFoundException(DBConstants.exc_missing_primary_key);
+            if (!populateAnnualWeekly(valueObject)) {
+                String sql = "UPDATE "+DBConstants.scheduleTableName+" SET "+DBConstants.p_assignedBy+" = ?, "+DBConstants.p_duration+" = ?, "
+                        +DBConstants.p_startDate+" = ?, "+DBConstants.p_programName+" = ?, "+DBConstants.p_presenterId+" = ?, "
+                        +DBConstants.p_producerId+" = ?, "+DBConstants.p_weekId+" = ? WHERE ("+DBConstants.p_id+" = ? ); ";
+                PreparedStatement stmt = null;
+                dataAccess.openConnection();
+                try {
+                    stmt = dataAccess.getConnection().prepareStatement(sql);
+                    stmt.setString(1, valueObject.getAssignedBy());
+                    stmt.setInt(2, valueObject.getDuration());
+                    stmt.setString(3, valueObject.getStartDate());
+                    stmt.setString(4, valueObject.getProgramName());
+                    stmt.setString(5, valueObject.getPresenterId());
+                    stmt.setString(6, valueObject.getProducerId());
+                    stmt.setInt(7, valueObject.getWeekId());
+                    stmt.setInt(8, valueObject.getProgramSlotId());
+                    
+                    int rowcount = databaseUpdate(stmt);
+                    if (rowcount == 0) {
+                        throw new NotFoundException(DBConstants.exc_missing_primary_key);
+                    }
+                    if (rowcount > 1) {
+                        throw new SQLException(DBConstants.exc_duplicate_primary_key);
+                    }
+                } finally {
+                    if (stmt != null)
+                        stmt.close();
+                    dataAccess.closeConnection();
+                }
             }
-            if (rowcount > 1) {
-                throw new SQLException(DBConstants.exc_duplicate_primary_key);
-            }
-        } finally {
-            if (stmt != null)
-                stmt.close();
-            closeConnection();
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
     }
     
@@ -359,9 +439,9 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         
         String sql = "DELETE FROM "+DBConstants.scheduleTableName+" WHERE ("+DBConstants.p_id+" = ? ); ";
         PreparedStatement stmt = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
-            stmt = connection.prepareStatement(sql);
+            stmt = dataAccess.getConnection().prepareStatement(sql);
             stmt.setInt(1, valueObject.getProgramSlotId());
             
             int rowcount = databaseUpdate(stmt);
@@ -374,7 +454,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         } finally {
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
     }
     
@@ -386,15 +466,15 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         
         String sql = "DELETE FROM "+DBConstants.scheduleTableName+"; ";
         PreparedStatement stmt = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
-            stmt = connection.prepareStatement(sql);
+            stmt = dataAccess.getConnection().prepareStatement(sql);
             int rowcount = databaseUpdate(stmt);
             System.out.println(""+rowcount);
         } finally {
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
             
         }
     }
@@ -409,9 +489,9 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         PreparedStatement stmt = null;
         ResultSet result = null;
         int allRows = 0;
-        openConnection();
+        dataAccess.openConnection();
         try {
-            stmt = connection.prepareStatement(sql);
+            stmt = dataAccess.getConnection().prepareStatement(sql);
             result = stmt.executeQuery();
             
             if (result.next())
@@ -421,42 +501,42 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                 result.close();
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
         return allRows;
     }
     
     /* (non-Javadoc)
-    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#searchMatching(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#searchMatchingDates(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
     */
     @Override
     public List<ProgramSlot> searchMatchingDates(int weekId, String startDate, String endDate) throws SQLException {
         
         @SuppressWarnings("UnusedAssignment")
                 List<ProgramSlot> searchResults = new ArrayList<>();
-        openConnection();
+        dataAccess.openConnection();
         boolean first = true;
         StringBuilder sql = new StringBuilder("SELECT * FROM "+DBConstants.scheduleTableName+" WHERE ");
-                        
+        
         if (startDate!=null) {
             if (endDate!=null) {
                 if (first) {
                     first=false;
-                    sql.append(DBConstants.p_startDate+">='"+startDate+"' AND "+DBConstants.p_startDate+"<='"+endDate+"'");                    
+                    sql.append(DBConstants.p_startDate+">='"+startDate+"' AND "+DBConstants.p_startDate+"<='"+endDate+"'");
                 }
             }
-        }        
-        if (weekId!=0) 
-           sql.append(" AND "+DBConstants.p_weekId+"="+weekId);
-            
+        }
+        if (weekId!=0)
+            sql.append(" AND "+DBConstants.p_weekId+"="+weekId);
+        
         sql.append(" ORDER BY "+DBConstants.p_id+" ASC ");
         // Prevent accidential full table results.
         // Use loadAll if all rows must be returned.
         if (first)
             searchResults = new ArrayList<>();
         else
-            searchResults = listQuery(connection.prepareStatement(sql.toString()));
-        closeConnection();
+            searchResults = listQuery(dataAccess.getConnection().prepareStatement(sql.toString()));
+        dataAccess.closeConnection();
         return searchResults;
     }
     
@@ -469,7 +549,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         
         @SuppressWarnings("UnusedAssignment")
                 List<ProgramSlot> searchResults = new ArrayList<>();
-        openConnection();
+        dataAccess.openConnection();
         boolean first = true;
         StringBuilder sql = new StringBuilder(
                 "SELECT * FROM "+DBConstants.scheduleTableName+" WHERE 1=1 ");
@@ -545,8 +625,8 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         if (first)
             searchResults = new ArrayList<>();
         else
-            searchResults = listQuery(connection.prepareStatement(sql.toString()));
-        closeConnection();
+            searchResults = listQuery(dataAccess.getConnection().prepareStatement(sql.toString()));
+        dataAccess.closeConnection();
         return searchResults;
     }
     
@@ -558,7 +638,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         
         @SuppressWarnings("UnusedAssignment")
                 List<WeeklySchedule> searchResults = new ArrayList<>();
-        openConnection();
+        dataAccess.openConnection();
         boolean first = true;
         StringBuilder sql = new StringBuilder(
                 "SELECT * FROM "+DBConstants.wScheduleTableName+" WHERE 1=1 ");
@@ -593,8 +673,8 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         if (first)
             searchResults = new ArrayList<>();
         else
-            searchResults = listQueryWS(connection.prepareStatement(sql.toString()));
-        closeConnection();
+            searchResults = listQueryWS(dataAccess.getConnection().prepareStatement(sql.toString()));
+        dataAccess.closeConnection();
         return searchResults;
     }
     
@@ -606,7 +686,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         
         @SuppressWarnings("UnusedAssignment")
                 List<AnnualSchedule> searchResults = new ArrayList<>();
-        openConnection();
+        dataAccess.openConnection();
         boolean first = true;
         StringBuilder sql = new StringBuilder(
                 "SELECT * FROM "+DBConstants.aScheduleTableName+" WHERE 1=1 ");
@@ -633,8 +713,8 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         if (first)
             searchResults = new ArrayList<>();
         else
-            searchResults = listQueryAS(connection.prepareStatement(sql.toString()));
-        closeConnection();
+            searchResults = listQueryAS(dataAccess.getConnection().prepareStatement(sql.toString()));
+        dataAccess.closeConnection();
         return searchResults;
     }
     
@@ -647,7 +727,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
      *
      * @param stmt
      *            This parameter contains the SQL statement to be executed.
-     * @return
+     * @return int
      * @throws java.sql.SQLException
      */
     protected int databaseUpdate(PreparedStatement stmt) throws SQLException {
@@ -678,7 +758,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             throws NotFoundException, SQLException {
         
         ResultSet result = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
             result = stmt.executeQuery();
             
@@ -703,7 +783,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                 result.close();
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
     }
     
@@ -724,7 +804,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             throws NotFoundException, SQLException {
         
         ResultSet result = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
             result = stmt.executeQuery();
             
@@ -747,7 +827,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                 result.close();
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
     }
     
@@ -768,7 +848,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             throws NotFoundException, SQLException {
         
         ResultSet result = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
             result = stmt.executeQuery();
             
@@ -789,7 +869,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                 result.close();
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
     }
     
@@ -801,14 +881,14 @@ public class ScheduleDAOImpl implements ScheduleDAO {
      *
      * @param stmt
      *            This parameter contains the SQL statement to be executed.
-     * @return List<ProgramSlot>
+     * @return a list of ProgramSlot
      * @throws java.sql.SQLException
      */
     protected List<ProgramSlot> listQuery(PreparedStatement stmt) throws SQLException {
         
         ArrayList<ProgramSlot> searchResults = new ArrayList<>();
         ResultSet result = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
             result = stmt.executeQuery();
             
@@ -836,7 +916,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                 result.close();
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
         
         return (List<ProgramSlot>) searchResults;
@@ -850,14 +930,14 @@ public class ScheduleDAOImpl implements ScheduleDAO {
      *
      * @param stmt
      *            This parameter contains the SQL statement to be executed.
-     * @return List<WeeklySchedule>
+     * @return a list of WeeklySchedule
      * @throws java.sql.SQLException
      */
     protected List<WeeklySchedule> listQueryWS(PreparedStatement stmt) throws SQLException {
         
         ArrayList<WeeklySchedule> searchResults = new ArrayList<>();
         ResultSet result = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
             result = stmt.executeQuery();
             
@@ -881,7 +961,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                 result.close();
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
         
         return (List<WeeklySchedule>) searchResults;
@@ -895,14 +975,14 @@ public class ScheduleDAOImpl implements ScheduleDAO {
      *
      * @param stmt
      *            This parameter contains the SQL statement to be executed.
-     * @return List<AnnualSchedule>
+     * @return a list of AnnualSchedule
      * @throws java.sql.SQLException
      */
     protected List<AnnualSchedule> listQueryAS(PreparedStatement stmt) throws SQLException {
         
         ArrayList<AnnualSchedule> searchResults = new ArrayList<>();
         ResultSet result = null;
-        openConnection();
+        dataAccess.openConnection();
         try {
             result = stmt.executeQuery();
             
@@ -924,36 +1004,9 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                 result.close();
             if (stmt != null)
                 stmt.close();
-            closeConnection();
+            dataAccess.closeConnection();
         }
         
         return (List<AnnualSchedule>) searchResults;
-    }
-    
-    private void openConnection() {
-        try {
-            Class.forName(DBConstants.COM_MYSQL_JDBC_DRIVER);
-        } catch (ClassNotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        
-        try {
-            this.connection = DriverManager.getConnection(DBConstants.dbUrl,
-                    DBConstants.dbUserName, DBConstants.dbPassword);
-        }
-        catch (SQLException e) {
-            throw new DAOException(e);
-        }
-        
-    }
-    
-    private void closeConnection() {
-        try {
-            this.connection.close();
-        }
-        catch (SQLException e) {
-            throw new DAOException(e);
-        }
     }
 }

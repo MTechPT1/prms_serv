@@ -6,17 +6,18 @@ package sg.edu.nus.iss.phoenix.core.exceptions;
  **/
 
 public class NotFoundException extends Exception {
-	/**
-	 * For eclipse based unique identity
-	 */
-	private static final long serialVersionUID = -8937329631346507674L;
-
-	/**
-	 * Constructor for NotFoundException. The input message is returned in
-	 * toString() message.
-	 */
-	public NotFoundException(String msg) {
-		super(msg);
-	}
-
+    /**
+     * For eclipse based unique identity
+     */
+    private static final long serialVersionUID = -8937329631346507674L;
+    
+    /**
+     * Constructor for NotFoundException. The input message is returned in
+     * toString() message.
+     * @param msg detailed error message
+     */
+    public NotFoundException(String msg) {
+        super(msg);
+    }
+    
 }

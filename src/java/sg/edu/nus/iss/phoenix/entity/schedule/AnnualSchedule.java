@@ -41,9 +41,9 @@ public class AnnualSchedule implements Cloneable, Serializable {
     
     /**
      * Get- and Set-methods for persistent variables. The default
-     * behaviour does not make any checks against malformed data,
+     * behavior does not make any checks against malformed data,
      * so these might require some manual additions.
-     * @return 
+     * @return String, String
      */
     
     public String getYear() {

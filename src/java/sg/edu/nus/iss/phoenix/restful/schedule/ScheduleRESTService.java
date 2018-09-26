@@ -41,9 +41,11 @@ public class ScheduleRESTService {
      */
     public ScheduleRESTService() {
         service = new ScheduleService();
-    }
-
+    }    
     
+    /**
+     * GET method for retrieving an instance of resource
+     * @return a list of AnnualSchedules */
     @GET
     @Path("/annual/all")
     @Produces(MediaType.APPLICATION_JSON)
@@ -63,7 +65,8 @@ public class ScheduleRESTService {
     
     /**
      * Retrieves representation of an instance of resource
-     * @return an instance of resource
+     * @param year to retrieve schedules for
+     * @return an instance of resource AnnualSchedule
      */
     @GET
     @Path("/annual/{year}")
@@ -76,7 +79,8 @@ public class ScheduleRESTService {
     
     /**
      * Retrieves representation of an instance of resource
-     * @return an instance of resource
+     * @param year to retrieve schedules for
+     * @return an instance of resource WeeklySchedule
      */
     @GET
     @Path("/weekly/{year}")
@@ -97,7 +101,8 @@ public class ScheduleRESTService {
     
     /**
      * Retrieves representation of an instance of resource
-     * @return an instance of resource
+     * @param programSlotId Id of the resource
+     * @return an instance of resource ProgramSlot
      */
     @GET
     @Path("/{programSlotId}")
@@ -110,7 +115,9 @@ public class ScheduleRESTService {
     
     /**
      * Retrieves representation of an instance of resource
-     * @return an instance of resource
+     * @param weekId Id of the resource
+     * @param year to retrieve schedules for
+     * @return a list of ProgramSlots as per specified criteria
      */
     @GET
     @Path("/{weekId}/{year}")
@@ -133,6 +140,10 @@ public class ScheduleRESTService {
         return psList;
     }
     
+    /**
+     * Retrieves representation of an instance of resource
+     * @return a list of ProgramSlots
+     */
     @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
@@ -155,8 +166,8 @@ public class ScheduleRESTService {
     }
     
     /**
-     * PUT method for updating or creating an instance of resource
-     * @param rp content representation for the resource
+     * PUT method for updating an instance of resource ProgramSlot
+     * @param ps content representation for the resource
      */
     @POST
     @Path("/update")
@@ -166,8 +177,8 @@ public class ScheduleRESTService {
     }
     
     /**
-     * POST method for creating an instance of resource
-     * @param rp content representation for the resource
+     * POST method for creating an instance of resource ProgramSlot
+     * @param ps content representation for the resource
      */
     @PUT
     @Path("/create")
@@ -177,7 +188,7 @@ public class ScheduleRESTService {
     }
     
     /**
-     * POST method for creating an instance of resource
+     * POST method for copying an instance of resource ProgramSlot
      * @param ps content representation for the resource
      */
     @PUT
@@ -188,7 +199,7 @@ public class ScheduleRESTService {
     }
     
     /**
-     * DELETE method for deleting an instance of resource
+     * DELETE method for deleting an instance of resource ProgramSlot
      * @param programSlotId Id of the resource
      */
     @DELETE

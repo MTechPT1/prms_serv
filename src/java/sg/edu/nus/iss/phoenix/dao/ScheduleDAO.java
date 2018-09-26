@@ -24,7 +24,8 @@ public interface ScheduleDAO {
      * create new value object instance. The reason why this method exists is
      * that sometimes the programmer may want to extend also the valueObject and
      * then this method can be over-rided to return extended valueObject.
-     * @return
+     *
+     * @return AnnualSchedule
      */
     public abstract AnnualSchedule createValueObjectAS();
     
@@ -34,7 +35,8 @@ public interface ScheduleDAO {
      * convenience method for the real load-method which accepts the valueObject
      * as a parameter. Returned valueObject will be created using the
      * createValueObject() method.
-     * @param year
+     *
+     * @param year to retrieve AnnualSchedule for
      * @return AnnualSchedule
      * @throws sg.edu.nus.iss.phoenix.core.exceptions.NotFoundException
      * @throws java.sql.SQLException
@@ -66,7 +68,7 @@ public interface ScheduleDAO {
      * consume huge amounts of resources if table has lot's of rows. This should
      * only be used when target tables have only small amounts of data.
      *
-     * @return List<AnnualSchedule>
+     * @return a list of AnnualSchedule
      * @throws java.sql.SQLException
      */
     public abstract List<AnnualSchedule> loadAllAS() throws SQLException;
@@ -92,6 +94,7 @@ public interface ScheduleDAO {
      * create new value object instance. The reason why this method exists is
      * that sometimes the programmer may want to extend also the valueObject and
      * then this method can be over-rided to return extended valueObject.
+     * 
      * @return ProgramSlot
      */
     public abstract ProgramSlot createValueObjectPS();
@@ -102,6 +105,7 @@ public interface ScheduleDAO {
      * convenience method for the real load-method which accepts the valueObject
      * as a parameter. Returned valueObject will be created using the
      * createValueObject() method.
+     * 
      * @param programSlotId
      * @return ProgramSlot
      * @throws sg.edu.nus.iss.phoenix.core.exceptions.NotFoundException
@@ -134,7 +138,7 @@ public interface ScheduleDAO {
      * consume huge amounts of resources if table has lot's of rows. This should
      * only be used when target tables have only small amounts of data.
      *
-     * @return List<ProgramSlot>
+     * @return a list of ProgramSlot
      * @throws java.sql.SQLException
      */
     public abstract List<ProgramSlot> loadAll() throws SQLException;
@@ -144,6 +148,7 @@ public interface ScheduleDAO {
      * create new value object instance. The reason why this method exists is
      * that sometimes the programmer may want to extend also the valueObject and
      * then this method can be over-rided to return extended valueObject.
+     *
      * @return WeeklySchedule
      */
     public abstract WeeklySchedule createValueObjectWS();
@@ -154,7 +159,8 @@ public interface ScheduleDAO {
      * convenience method for the real load-method which accepts the valueObject
      * as a parameter. Returned valueObject will be created using the
      * createValueObject() method.
-     * @param year
+     *
+     * @param year to retrieve WeeklySchedule for
      * @return WeeklySchedule
      * @throws sg.edu.nus.iss.phoenix.core.exceptions.NotFoundException
      * @throws java.sql.SQLException
@@ -168,7 +174,8 @@ public interface ScheduleDAO {
      * consume huge amounts of resources if table has lot's of rows. This should
      * only be used when target tables have only small amounts of data.
      *
-     * @return List<WeeklySchedule>
+     * @param year to load WeeklySchedule for
+     * @return a list of WeeklySchedule
      * @throws java.sql.SQLException
      */
     public abstract List<WeeklySchedule> loadAllWS(String year) throws SQLException;
@@ -296,10 +303,10 @@ public interface ScheduleDAO {
      * those criteria you specified. Those instance-variables that have NULL
      * values are excluded in search-criteria.
      *
-     * @param startDate, endDate
-     *            This parameter contains the class instance where search will
-     *            be based. Primary-key field should not be set.
-     * @return List<ProgramSlot>
+     * @param weekId 
+     * @param startDate 
+     * @param endDate
+     * @return a list of ProgramSlot
      * @throws java.sql.SQLException
      */
     public abstract List<ProgramSlot> searchMatchingDates(int weekId, String startDate, String endDate)
@@ -317,7 +324,7 @@ public interface ScheduleDAO {
      * @param valueObject
      *            This parameter contains the class instance where search will
      *            be based. Primary-key field should not be set.
-     * @return List<ProgramSlot>
+     * @return a list of ProgramSlot
      * @throws java.sql.SQLException
      */
     public abstract List<ProgramSlot> searchMatching(ProgramSlot valueObject)
@@ -335,7 +342,7 @@ public interface ScheduleDAO {
      * @param valueObject
      *            This parameter contains the class instance where search will
      *            be based. Primary-key field should not be set.
-     * @return List<WeeklySchedule>
+     * @return a list of WeeklySchedule
      * @throws java.sql.SQLException
      */
     public abstract List<WeeklySchedule> searchMatchingWS(WeeklySchedule valueObject)
@@ -353,7 +360,7 @@ public interface ScheduleDAO {
      * @param valueObject
      *            This parameter contains the class instance where search will
      *            be based. Primary-key field should not be set.
-     * @return List<AnnualSchedule>
+     * @return a list of AnnualSchedule
      * @throws java.sql.SQLException
      */
     public abstract List<AnnualSchedule> searchMatchingAS(AnnualSchedule valueObject)
