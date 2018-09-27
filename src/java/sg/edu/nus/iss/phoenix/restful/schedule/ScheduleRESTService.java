@@ -169,7 +169,7 @@ public class ScheduleRESTService {
      * PUT method for updating an instance of resource ProgramSlot
      * @param ps content representation for the resource
      */
-    @POST
+    @PUT
     @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
     public void updateProgramSlot(ProgramSlot ps) {
@@ -180,7 +180,7 @@ public class ScheduleRESTService {
      * POST method for creating an instance of resource ProgramSlot
      * @param ps content representation for the resource
      */
-    @PUT
+    @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     public void createProgramSlot(ProgramSlot ps) {
@@ -191,7 +191,7 @@ public class ScheduleRESTService {
      * POST method for copying an instance of resource ProgramSlot
      * @param ps content representation for the resource
      */
-    @PUT
+    @POST
     @Path("/copy")
     @Consumes(MediaType.APPLICATION_JSON)
     public void copyProgramSlot(ProgramSlot ps) {
