@@ -52,9 +52,9 @@ public class ProgramSlot implements Cloneable, Serializable {
     
     /**
      * Get- and Set-methods for persistent variables. The default
-     * behaviour does not make any checks against malformed data,
+     * behavior does not make any checks against malformed data,
      * so these might require some manual additions.
-     * @return 
+     * @return int, String, int, String, String, String, String, int
      */
     public int getProgramSlotId() {
         return programSlotId;
@@ -126,15 +126,15 @@ public class ProgramSlot implements Cloneable, Serializable {
      * set the initial state of this object. Note that this method will
      * directly modify instance variables, without going trough the 
      * individual set-methods.
-     * @param programSlotId
-     * @param assignedBy
-     * @param duration
-     * @param startDate
-     * @param programName
-     * @param presenterId
-     * @param producerId
+     * @param programSlotId Id of ProgramSlot
+     * @param assignedBy Created by userId
+     * @param duration Length of ProgramSlot
+     * @param startDate Start date and time of ProgramSlot
+     * @param programName Name of radio program for this ProgramSlot
+     * @param presenterId Presenter userId
+     * @param producerId Producer userId
+     * @param weekId Id of WeeklySchedule
      */
-
     public void setAll(int programSlotId, String assignedBy, int duration, String startDate, String programName, String presenterId, String producerId, int weekId) {
         this.programSlotId = programSlotId;
         this.assignedBy = assignedBy;
@@ -154,49 +154,75 @@ public class ProgramSlot implements Cloneable, Serializable {
      * are the same instance. However it does mean that in that moment, they 
      * are mapped to the same row in database.
      * @param valueObject
-     * @return 
+     * @return Boolean
      */
     public boolean hasEqualMapping(ProgramSlot valueObject) {
 
-          if (this.programSlotId == 0) {
-                    if (valueObject.getProgramSlotId() != 0)
+          if (this.assignedBy == null) {
+                    if (valueObject.getAssignedBy() != null)
                            return(false);
-          } else if (!(this.programSlotId == valueObject.getProgramSlotId())) {
+          } else if (!this.assignedBy.equals(valueObject.getAssignedBy())) {
                     return(false);
           }
-          /**
-          if (this.description == null) {
-                    if (valueObject.getDescription() != null)
+          if (this.duration == 0) {
+                    if (valueObject.getDuration() != 0)
                            return(false);
-          } else if (!this.description.equals(valueObject.getDescription())) {
+          } else if (!(this.duration == valueObject.getDuration())) {
+                    return(false);
+          }          
+          if (this.startDate == null) {
+                    if (valueObject.getStartDate() != null)
+                           return(false);
+          } else if (!this.startDate.equals(valueObject.getStartDate())) {
+                    return(false);
+          }          
+          if (this.programName == null) {
+                    if (valueObject.getProgramName() != null)
+                           return(false);
+          } else if (!this.programName.equals(valueObject.getProgramName())) {
+                    return(false);
+          }          
+          if (this.presenterId == null) {
+                    if (valueObject.getPresenterId() != null)
+                           return(false);
+          } else if (!this.presenterId.equals(valueObject.getPresenterId())) {
+                    return(false);
+          }          
+          if (this.producerId == null) {
+                    if (valueObject.producerId != null)
+                           return(false);
+          } else if (!this.producerId.equals(valueObject.getProducerId())) {
+                    return(false);
+          }          
+          if (this.weekId == 0) {
+                    if (valueObject.getWeekId() != 0)
+                           return(false);
+          } else if (!(this.weekId == valueObject.getWeekId())) {
                     return(false);
           }
-          if (this.typicalDuration == null) {
-                    if (valueObject.getTypicalDuration() != null)
-                           return(false);
-          } else if (!this.typicalDuration.equals(valueObject.getTypicalDuration())) {
-                    return(false);
-          }
-          */
 
           return true;
     }
-
-
 
     /**
      * toString will return String object representing the state of this 
      * valueObject. This is useful during application development, and 
      * possibly when application is writing object states in text log.
+     * @return String
      */
         @Override
     public String toString() {
         StringBuilder out = new StringBuilder();
-        out.append("\nRadioProgram class, mapping to table radio-program\n");
+        out.append("\nProgramSlot class, mapping to table tblprogramslot\n");
         out.append("Persistent attributes: \n"); 
-        //out.append("name = ").append(this.name).append("\n"); 
-        //out.append("description = ").append(this.description).append("\n"); 
-        //out.append("typicalDuration = ").append(this.typicalDuration).append("\n"); 
+        out.append("programSlotId = ").append(this.programSlotId).append("\n"); 
+        out.append("assignedBy = ").append(this.assignedBy).append("\n"); 
+        out.append("duration = ").append(this.duration).append("\n"); 
+        out.append("startDate = ").append(this.startDate).append("\n"); 
+        out.append("programName = ").append(this.programName).append("\n"); 
+        out.append("presenterId = ").append(this.presenterId).append("\n"); 
+        out.append("producerId = ").append(this.producerId).append("\n"); 
+        out.append("weekId = ").append(this.weekId).append("\n"); 
         return out.toString();
     }
 
@@ -206,7 +232,7 @@ public class ProgramSlot implements Cloneable, Serializable {
      * Note, that this method is different than the clone() which
      * is defined in java.lang.Object. Here, the returned cloned object
      * will also have all its attributes cloned.
-     * @return 
+     * @return Object
      * @throws java.lang.CloneNotSupportedException 
      */
         @Override
@@ -215,8 +241,20 @@ public class ProgramSlot implements Cloneable, Serializable {
 
         if (this.programSlotId != 0)
              cloned.setProgramSlotId(this.programSlotId); 
+        if (this.assignedBy != null)
+             cloned.setAssignedBy(this.assignedBy); 
         if (this.duration != 0)
              cloned.setDuration(this.duration); 
+        if (this.startDate != null)
+             cloned.setStartDate(this.startDate); 
+        if (this.programName != null)
+             cloned.setProgramName(this.programName); 
+        if (this.presenterId != null)
+             cloned.setPresenterId(this.presenterId); 
+        if (this.producerId != null)
+             cloned.setProducerId(this.producerId); 
+        if (this.weekId != 0)
+             cloned.setWeekId(this.weekId); 
         return cloned;
     }
 }

@@ -6,11 +6,7 @@
 package sg.edu.nus.iss.phoenix.service;
 
 import java.sql.SQLException;
-import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import sg.edu.nus.iss.phoenix.core.dao.DAOFactoryImpl;
 import sg.edu.nus.iss.phoenix.core.exceptions.DAOException;
 import sg.edu.nus.iss.phoenix.core.exceptions.NotFoundException;
@@ -27,6 +23,9 @@ public class ScheduleService {
     DAOFactoryImpl factory;
     ScheduleDAO scheduleDAO;
     
+    /**
+     *
+     */
     public ScheduleService() {
         super();
         // Sorry. This implementation is wrong. To be fixed.
@@ -34,6 +33,11 @@ public class ScheduleService {
         scheduleDAO = factory.getScheduleDAO();
     }
     
+    /**
+     * Find Annual Schedule for a particular year
+     * @param year
+     * @return
+     */
     public AnnualSchedule findAS (String year) {
         ArrayList<AnnualSchedule> currentasList;
         AnnualSchedule currentas = new AnnualSchedule();
@@ -53,6 +57,10 @@ public class ScheduleService {
         return currentas;
     }
     
+    /**
+     * Find list of all Annual Schedules
+     * @return
+     */
     public ArrayList<AnnualSchedule> findAllAS() {
         ArrayList<AnnualSchedule> currentList = new ArrayList<AnnualSchedule>();
         try {
@@ -64,6 +72,11 @@ public class ScheduleService {
         return currentList;
     }
     
+    /**
+     *Find Weekly Schedule for a particular year
+     * @param year
+     * @return
+     */
     public WeeklySchedule findWS (String year) {
         ArrayList<WeeklySchedule> currentwsList;
         WeeklySchedule currentws = new WeeklySchedule();
@@ -82,6 +95,11 @@ public class ScheduleService {
         return currentws;
     }
     
+    /**
+     * Find list of Weekly Schedules
+     * @param year
+     * @return
+     */
     public ArrayList<WeeklySchedule> findAllWS(String year) {
         ArrayList<WeeklySchedule> currentList = new ArrayList<WeeklySchedule>();
         try {
@@ -93,12 +111,17 @@ public class ScheduleService {
         return currentList;
     }
     
+    /**
+     * Find list of Program Slots for a weekId and year
+     * @param weekId
+     * @param year
+     * @return
+     */
     public ArrayList<ProgramSlot> findPSByDates(int weekId, String year) {
+        String startDate=year+"-01-01 00:00:00";
+        String endDate=year+"-12-31 23:59:59";
         ArrayList<ProgramSlot> currentList = new ArrayList<ProgramSlot>();
-        try {            
-            String startDate=year+"-01-01 00:00:00";
-            String endDate=year+"-12-31 23:59:59";
-            
+        try {
             currentList = (ArrayList<ProgramSlot>) scheduleDAO.searchMatchingDates(weekId,startDate,endDate);
         } catch (SQLException e) {
             // TODO Auto-generated catch block
@@ -107,6 +130,11 @@ public class ScheduleService {
         return currentList;
     }
     
+    /**
+     * Find list of Program Slots for given matching criteria
+     * @param ps
+     * @return
+     */
     public ArrayList<ProgramSlot> findPSByCriteria(ProgramSlot ps) {
         ArrayList<ProgramSlot> currentList = new ArrayList<ProgramSlot>();
         try {
@@ -118,6 +146,11 @@ public class ScheduleService {
         return currentList;
     }
     
+    /**
+     * Find ProgramSlot by Id of resource
+     * @param programSlotId
+     * @return
+     */
     public ProgramSlot findPS(int programSlotId) {
         ProgramSlot currentps = new ProgramSlot();
         currentps.setProgramSlotId(programSlotId);
@@ -131,6 +164,10 @@ public class ScheduleService {
         return currentps;
     }
     
+    /**
+     * Find list of all Program Slots
+     * @return
+     */
     public ArrayList<ProgramSlot> findAllPS() {
         ArrayList<ProgramSlot> currentList = new ArrayList<ProgramSlot>();
         try {
@@ -142,80 +179,25 @@ public class ScheduleService {
         return currentList;
     }
     
-    public void populateAnnualWeekly(ProgramSlot ps) {
-        Calendar cal = Calendar.getInstance();
-        
-        java.util.Date dt = new java.util.Date();
-        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        try {
-            dt = sdf.parse(ps.getStartDate());
-        } catch (ParseException ex) {
-            Logger.getLogger(ScheduleService.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        
-        cal.setTime(dt);
-        int year = cal.get(Calendar.YEAR);
-        try {
-            if (findAS(Integer.toString(year))==null) {
-                //populate annual schedule
-                AnnualSchedule as = new AnnualSchedule(Integer.toString(year),ps.getAssignedBy());
-                scheduleDAO.createAS(as);
-                
-                cal.set(year, 0, 1);
-                sdf = new java.text.SimpleDateFormat("yyyy-MM-dd");
-                //populate weekly schedule
-                for (int i=1; i<53; i++) {
-                    String date=sdf.format(cal.getTime());
-                    WeeklySchedule ws = new WeeklySchedule(i,date,ps.getAssignedBy(),Integer.toString(year));
-                    scheduleDAO.createWS(ws);
-                    cal.add(Calendar.WEEK_OF_YEAR, 1);
-                }
-            }
-        }catch (SQLException e) {
-            // TODO Auto-generated catch block
-            throw new DAOException(e);
-        }
-    }
-    
-    public Boolean isProgramSlotExists(ProgramSlot ps) {
-        ArrayList<ProgramSlot> currentList = new ArrayList<ProgramSlot>();
-        try {            
-            String startDate=ps.getStartDate();
-            Calendar cal = Calendar.getInstance();            
-            java.util.Date dt = new java.util.Date();
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            try {
-                dt = sdf.parse(ps.getStartDate());
-            } catch (ParseException ex) {
-                Logger.getLogger(ScheduleService.class.getName()).log(Level.SEVERE, null, ex);
-            }            
-            cal.setTime(dt);
-            cal.add(Calendar.MINUTE, ps.getDuration());            
-            String endDate=sdf.format(cal.getTime());            
-            currentList = (ArrayList<ProgramSlot>) scheduleDAO.searchMatchingDates(0,startDate,endDate);
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        if (!currentList.isEmpty())
-            return true;
-        return false;
-    }
-    
+    /**
+     * Create a ProgramSlot
+     * @param ps
+     */
     public void processCreate(ProgramSlot ps) {
         try {
-            populateAnnualWeekly(ps);
-            if (!isProgramSlotExists(ps)) 
-                scheduleDAO.createPS(ps);
+            scheduleDAO.createPS(ps);
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             throw new DAOException(e);
         }
     }
     
+    /**
+     * Modify a ProgramSlot
+     * @param ps
+     */
     public void processModify(ProgramSlot ps) {
         try {
-            populateAnnualWeekly(ps);
             scheduleDAO.save(ps);
         } catch (NotFoundException e) {
             // TODO Auto-generated catch block
@@ -227,6 +209,10 @@ public class ScheduleService {
         
     }
     
+    /**
+     * Delete a ProgramSlot
+     * @param programSlotId
+     */
     public void processDelete(int programSlotId) {
         try {
             ProgramSlot ps = new ProgramSlot(programSlotId);

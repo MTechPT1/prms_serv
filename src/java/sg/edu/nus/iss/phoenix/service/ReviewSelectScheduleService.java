@@ -21,6 +21,11 @@ public class ReviewSelectScheduleService {
     DAOFactoryImpl factory;
     ScheduleDAO psdao;
     
+    /**
+     * Constructor. 
+     * Takes no arguments and provides the most simple
+     * way to create object instance. 
+     */
     public ReviewSelectScheduleService() {
         super();
         // TODO Auto-generated constructor stub
@@ -28,6 +33,10 @@ public class ReviewSelectScheduleService {
         psdao = factory.getScheduleDAO();
     }
     
+    /**
+     * Loads all the ProgramSlots available 
+     * @return a list of ProgramSlot
+     */
     public List<ProgramSlot> reviewSelectProgramSlot() {
         List<ProgramSlot> data = null;
         try {
@@ -37,5 +46,4 @@ public class ReviewSelectScheduleService {
         }
         return data;
     }
-    
 }

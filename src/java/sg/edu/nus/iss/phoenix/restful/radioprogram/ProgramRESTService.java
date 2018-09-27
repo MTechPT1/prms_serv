@@ -81,7 +81,7 @@ public class ProgramRESTService {
      * PUT method for updating or creating an instance of resource
      * @param rp content representation for the resource
      */
-    @POST
+    @PUT
     @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
     public void updateRadioProgram(RadioProgram rp) {
@@ -92,7 +92,7 @@ public class ProgramRESTService {
      * POST method for creating an instance of resource
      * @param rp content representation for the resource
      */
-    @PUT
+    @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
     public void createRadioProgram(RadioProgram rp) {
