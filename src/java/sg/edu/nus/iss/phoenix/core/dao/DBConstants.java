@@ -13,7 +13,7 @@ public class DBConstants {
     // Table names
     public static final String usersTableName = "user";
     public static final String rolesTableName = "role";
-    public static final String programTableName = "radio-programs";
+    public static final String programTableName = "tblradioprogram";
     public static final String scheduleTableName = "tblprogramslot";
     public static final String wScheduleTableName = "tblweeklyschedule";
     public static final String aScheduleTableName = "tblannualschedule";
