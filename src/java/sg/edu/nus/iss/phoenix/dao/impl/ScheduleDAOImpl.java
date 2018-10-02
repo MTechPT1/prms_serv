@@ -297,14 +297,18 @@ public class ScheduleDAOImpl implements ScheduleDAO {
        
         Calendar cal = Calendar.getInstance();
         java.util.Date startDate = null;
+        java.util.Date PSstartDate = null;
+        
         java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
             startDate = sdf.parse(ps.getStartDate());
+            PSstartDate = sdf.parse(ps.getStartDate());
         } catch (ParseException ex) {
             ex.printStackTrace();
         }
         cal.setTime(startDate);
         cal.add(Calendar.MINUTE, ps.getDuration());
+        java.util.Date PSendDate=cal.getTime();
         cal.add(Calendar.SECOND, -1);
         java.util.Date endDate=cal.getTime();
         cal.setTime(startDate); 
@@ -314,7 +318,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         firstList = (ArrayList<ProgramSlot>) loadAll();
         for (int i=0; i<firstList.size(); i++) {
             java.util.Date tmpStartDate = null;
-            try {
+           try {
                 tmpStartDate = sdf.parse(firstList.get(i).getStartDate());
             } catch (ParseException ex) {
                 ex.printStackTrace();
@@ -323,6 +327,10 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             cal.add(Calendar.MINUTE, firstList.get(i).getDuration());
             java.util.Date  tmpEndDate = cal.getTime();
             
+            if ((ps.getProgramSlotId()==firstList.get(i).getProgramSlotId())&&
+                    (PSstartDate.compareTo(tmpStartDate)==0)&&(PSendDate.compareTo(tmpEndDate)==0)) {
+                return false;
+            }
             if (((startDate.after(tmpStartDate)) && (endDate.before(tmpEndDate)))||
                 ((startDate.after(tmpStartDate)) && (startDate.before(tmpEndDate)))||
                     ((endDate.after(tmpStartDate)) && (endDate.before(tmpEndDate)))) {
