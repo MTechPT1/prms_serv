@@ -151,7 +151,7 @@ public class UserServiceTest {
         Assert.assertEquals(user.getJoinDate(), "01012018");
     }
     
-    @Test
+    @Test(expected = NotFoundException.class)
     public void testGetUnavailableUser() throws NotFoundException, SQLException {
         Mockito.when(userDao.getObject("12345")).thenThrow(NotFoundException.class);
         

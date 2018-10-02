@@ -35,6 +35,13 @@ public class UserService {
         userDAO = daoFactory.getUserDAO();
     }
     
+    /**
+     * Retrieves the users based on the role type
+     * 
+     * @param roleType
+     * @return
+     * @throws SQLException 
+     */
     public Response getUsers(String roleType) throws SQLException {
         if (roleType == null) {
             roleType = "ALL";
@@ -60,6 +67,14 @@ public class UserService {
         return Response.ok(users, MediaType.APPLICATION_JSON).build();
     }
     
+    /**
+     * Retrieves a user based on the ID
+     * 
+     * @param userId
+     * @return
+     * @throws NotFoundException
+     * @throws SQLException 
+     */
     public Response getUser(String userId) throws NotFoundException, SQLException {
         User user = new User();
         
@@ -78,6 +93,13 @@ public class UserService {
         return Response.ok(user, MediaType.APPLICATION_JSON).build();
     }
     
+    /**
+     * Creates a new user
+     * 
+     * @param user
+     * @return
+     * @throws SQLException 
+     */
     public Response createUser(User user) throws SQLException {
         logger.debug("Creating a new user: " + user.toString());
         
@@ -91,6 +113,14 @@ public class UserService {
         return Response.ok(user, MediaType.APPLICATION_JSON).build();
     }
     
+    /**
+     * Modifies a user's data in the database
+     * 
+     * @param user
+     * @return
+     * @throws NotFoundException
+     * @throws SQLException 
+     */
     public Response modifyUser(User user) throws NotFoundException, SQLException {
         logger.debug("Modifying user: " + user.toString());
         
@@ -107,6 +137,14 @@ public class UserService {
         return Response.ok(user, MediaType.APPLICATION_JSON).build();
     }
     
+    /**
+     * Deletes a user from the data base
+     * 
+     * @param userId
+     * @return
+     * @throws NotFoundException
+     * @throws SQLException 
+     */
     public Response deleteUser(String userId) throws NotFoundException, SQLException {
         logger.debug("Deleting user with userId: " + userId);
         
@@ -126,6 +164,13 @@ public class UserService {
         return Response.ok().build();
     }
     
+    /**
+     * Filters the users based on their role type(s)
+     * 
+     * @param userList
+     * @param roleType
+     * @return 
+     */
     private List<User> filterUsers(List<User> userList, String roleType) {
         List<User> filteredList = new ArrayList<>();
         

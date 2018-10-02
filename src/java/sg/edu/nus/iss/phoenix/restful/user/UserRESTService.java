@@ -39,6 +39,14 @@ public class UserRESTService {
         service = new UserService();
     }
     
+    /**
+     * Get users based on role type
+     * 
+     * @param roleType
+     * @return
+     * @throws NotFoundException
+     * @throws SQLException 
+     */
     @GET
     @Produces(MediaType.APPLICATION_JSON)
     public Response getAllUsers (
@@ -46,6 +54,14 @@ public class UserRESTService {
         return service.getUsers(roleType);
     }
     
+    /**
+     * Get user based on user ID
+     * 
+     * @param userId
+     * @return
+     * @throws NotFoundException
+     * @throws SQLException 
+     */
     @GET
     @Path("{user_id}")
     @Produces(MediaType.APPLICATION_JSON)
@@ -53,6 +69,13 @@ public class UserRESTService {
         return service.getUser(userId);
     }
     
+    /**
+     * Creates a new user
+     * 
+     * @param user
+     * @return
+     * @throws SQLException 
+     */
     @POST
     @Path("create")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -61,6 +84,14 @@ public class UserRESTService {
         return service.createUser(user);
     }
     
+    /**
+     * Updates a user's data stored in the database
+     * 
+     * @param user
+     * @return
+     * @throws NotFoundException
+     * @throws SQLException 
+     */
     @PUT
     @Path("update")
     @Consumes(MediaType.APPLICATION_JSON)
@@ -69,6 +100,14 @@ public class UserRESTService {
         return service.modifyUser(user);
     }
     
+    /**
+     * Deletes a user from the database based on the ID
+     * 
+     * @param userId
+     * @return
+     * @throws NotFoundException
+     * @throws SQLException 
+     */
     @DELETE
     @Path("delete/{user_id}")
     @Produces(MediaType.APPLICATION_JSON)
