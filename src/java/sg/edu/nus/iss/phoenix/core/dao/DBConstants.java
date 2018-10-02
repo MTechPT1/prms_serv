@@ -60,4 +60,5 @@ public class DBConstants {
     public static final String exc_missing_program_slot = "Program slot object not found !";
     public static final String exc_missing_weekly_schedule = "Weekly schedule object not found !";
     public static final String exc_missing_annual_schedule = "Annualschedule object not found !";
+    public static final String exc_program_slot_assigned = "Program slot assigned !";
 }

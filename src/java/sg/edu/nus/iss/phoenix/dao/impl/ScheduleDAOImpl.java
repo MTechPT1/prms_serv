@@ -17,7 +17,6 @@ import java.util.List;
 import sg.edu.nus.iss.phoenix.core.dao.DBConstants;
 import sg.edu.nus.iss.phoenix.core.dao.DataAccess;
 import sg.edu.nus.iss.phoenix.core.exceptions.NotFoundException;
-import sg.edu.nus.iss.phoenix.core.exceptions.DAOException;
 import sg.edu.nus.iss.phoenix.dao.ScheduleDAO;
 import sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot;
 import sg.edu.nus.iss.phoenix.entity.schedule.WeeklySchedule;
@@ -247,6 +246,9 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         return searchResults;
     }
     
+    /* (non-Javadoc)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#populateAnnualWeekly(sg.edu.nus.iss.phoenix.entity.schedule.AnnualSchedule/WeeklySchedule)
+    */
     private Boolean populateAnnualWeekly(ProgramSlot ps) throws ParseException, SQLException {
         Boolean first = false;
         Calendar cal = Calendar.getInstance();
@@ -282,33 +284,51 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             }
         }catch (SQLException e) {
             // TODO Auto-generated catch block
-            throw new DAOException(e);
+            throw new SQLException(e);
         }
         return first;
     }
     
+    /* (non-Javadoc)
+    * @see sg.edu.nus.iss.phoenix.dao.impl.ScheduleDAO#isProgramSlotAssigned(sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot)
+    */
     private Boolean isProgramSlotAssigned(ProgramSlot ps) throws ParseException, SQLException {
-        ArrayList<ProgramSlot> currentList = new ArrayList<ProgramSlot>();
+        ArrayList<ProgramSlot> firstList = new ArrayList<ProgramSlot>();
+       
+        Calendar cal = Calendar.getInstance();
+        java.util.Date startDate = null;
+        java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         try {
-            String startDate=ps.getStartDate();
-            Calendar cal = Calendar.getInstance();
-            java.util.Date dt = new java.util.Date();
-            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            startDate = sdf.parse(ps.getStartDate());
+        } catch (ParseException ex) {
+            ex.printStackTrace();
+        }
+        cal.setTime(startDate);
+        cal.add(Calendar.MINUTE, ps.getDuration());
+        cal.add(Calendar.SECOND, -1);
+        java.util.Date endDate=cal.getTime();
+        cal.setTime(startDate); 
+        cal.add(Calendar.SECOND, 1);
+        startDate = cal.getTime();
+        
+        firstList = (ArrayList<ProgramSlot>) loadAll();
+        for (int i=0; i<firstList.size(); i++) {
+            java.util.Date tmpStartDate = null;
             try {
-                dt = sdf.parse(ps.getStartDate());
+                tmpStartDate = sdf.parse(firstList.get(i).getStartDate());
             } catch (ParseException ex) {
                 ex.printStackTrace();
             }
-            cal.setTime(dt);
-            cal.add(Calendar.MINUTE, ps.getDuration());
-            String endDate=sdf.format(cal.getTime());
-            currentList = (ArrayList<ProgramSlot>) searchMatchingDates(0,startDate,endDate);
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            cal.setTime(tmpStartDate);
+            cal.add(Calendar.MINUTE, firstList.get(i).getDuration());
+            java.util.Date  tmpEndDate = cal.getTime();
+            
+            if (((startDate.after(tmpStartDate)) && (endDate.before(tmpEndDate)))||
+                ((startDate.after(tmpStartDate)) && (startDate.before(tmpEndDate)))||
+                    ((endDate.after(tmpStartDate)) && (endDate.before(tmpEndDate)))) {
+                return true; //cannot insert - programSlot is assigned
+            }
         }
-        if (!currentList.isEmpty())
-            return true;
         return false;
     }
     
@@ -349,6 +369,8 @@ public class ScheduleDAOImpl implements ScheduleDAO {
                         dataAccess.closeConnection();
                     }
                 }
+                else
+                    throw new SQLException(DBConstants.exc_program_slot_assigned);
             }
         } catch (ParseException e) {
             e.printStackTrace();
@@ -392,34 +414,38 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             SQLException {
         try {
             if (!populateAnnualWeekly(valueObject)) {
-                String sql = "UPDATE "+DBConstants.scheduleTableName+" SET "+DBConstants.p_assignedBy+" = ?, "+DBConstants.p_duration+" = ?, "
-                        +DBConstants.p_startDate+" = ?, "+DBConstants.p_programName+" = ?, "+DBConstants.p_presenterId+" = ?, "
-                        +DBConstants.p_producerId+" = ?, "+DBConstants.p_weekId+" = ? WHERE ("+DBConstants.p_id+" = ? ); ";
-                PreparedStatement stmt = null;
-                dataAccess.openConnection();
-                try {
-                    stmt = dataAccess.getConnection().prepareStatement(sql);
-                    stmt.setString(1, valueObject.getAssignedBy());
-                    stmt.setInt(2, valueObject.getDuration());
-                    stmt.setString(3, valueObject.getStartDate());
-                    stmt.setString(4, valueObject.getProgramName());
-                    stmt.setString(5, valueObject.getPresenterId());
-                    stmt.setString(6, valueObject.getProducerId());
-                    stmt.setInt(7, valueObject.getWeekId());
-                    stmt.setInt(8, valueObject.getProgramSlotId());
-                    
-                    int rowcount = databaseUpdate(stmt);
-                    if (rowcount == 0) {
-                        throw new NotFoundException(DBConstants.exc_missing_primary_key);
+                if (!isProgramSlotAssigned(valueObject)) {
+                    String sql = "UPDATE "+DBConstants.scheduleTableName+" SET "+DBConstants.p_assignedBy+" = ?, "+DBConstants.p_duration+" = ?, "
+                            +DBConstants.p_startDate+" = ?, "+DBConstants.p_programName+" = ?, "+DBConstants.p_presenterId+" = ?, "
+                            +DBConstants.p_producerId+" = ?, "+DBConstants.p_weekId+" = ? WHERE ("+DBConstants.p_id+" = ? ); ";
+                    PreparedStatement stmt = null;
+                    dataAccess.openConnection();
+                    try {
+                        stmt = dataAccess.getConnection().prepareStatement(sql);
+                        stmt.setString(1, valueObject.getAssignedBy());
+                        stmt.setInt(2, valueObject.getDuration());
+                        stmt.setString(3, valueObject.getStartDate());
+                        stmt.setString(4, valueObject.getProgramName());
+                        stmt.setString(5, valueObject.getPresenterId());
+                        stmt.setString(6, valueObject.getProducerId());
+                        stmt.setInt(7, valueObject.getWeekId());
+                        stmt.setInt(8, valueObject.getProgramSlotId());
+                        
+                        int rowcount = databaseUpdate(stmt);
+                        if (rowcount == 0) {
+                            throw new NotFoundException(DBConstants.exc_missing_primary_key);
+                        }
+                        if (rowcount > 1) {
+                            throw new SQLException(DBConstants.exc_duplicate_primary_key);
+                        }
+                    } finally {
+                        if (stmt != null)
+                            stmt.close();
+                        dataAccess.closeConnection();
                     }
-                    if (rowcount > 1) {
-                        throw new SQLException(DBConstants.exc_duplicate_primary_key);
-                    }
-                } finally {
-                    if (stmt != null)
-                        stmt.close();
-                    dataAccess.closeConnection();
                 }
+                else
+                    throw new SQLException(DBConstants.exc_program_slot_assigned);
             }
         } catch (ParseException e) {
             e.printStackTrace();
@@ -530,14 +556,14 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             sql.append(" AND "+DBConstants.p_weekId+"="+weekId);
         
         sql.append(" ORDER BY "+DBConstants.p_id+" ASC ");
-        // Prevent accidential full table results.
-        // Use loadAll if all rows must be returned.
-        if (first)
-            searchResults = new ArrayList<>();
-        else
-            searchResults = listQuery(dataAccess.getConnection().prepareStatement(sql.toString()));
-        dataAccess.closeConnection();
-        return searchResults;
+// Prevent accidential full table results.
+// Use loadAll if all rows must be returned.
+if (first)
+    searchResults = new ArrayList<>();
+else
+    searchResults = listQuery(dataAccess.getConnection().prepareStatement(sql.toString()));
+dataAccess.closeConnection();
+return searchResults;
     }
     
     
@@ -620,14 +646,14 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         
         sql.append("ORDER BY "+DBConstants.p_id+" ASC ");
         
-        // Prevent accidential full table results.
-        // Use loadAll if all rows must be returned.
-        if (first)
-            searchResults = new ArrayList<>();
-        else
-            searchResults = listQuery(dataAccess.getConnection().prepareStatement(sql.toString()));
-        dataAccess.closeConnection();
-        return searchResults;
+// Prevent accidential full table results.
+// Use loadAll if all rows must be returned.
+if (first)
+    searchResults = new ArrayList<>();
+else
+    searchResults = listQuery(dataAccess.getConnection().prepareStatement(sql.toString()));
+dataAccess.closeConnection();
+return searchResults;
     }
     
     /* (non-Javadoc)
@@ -668,14 +694,14 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         }
         sql.append("ORDER BY "+DBConstants.w_year+" ASC ");
         
-        // Prevent accidential full table results.
-        // Use loadAll if all rows must be returned.
-        if (first)
-            searchResults = new ArrayList<>();
-        else
-            searchResults = listQueryWS(dataAccess.getConnection().prepareStatement(sql.toString()));
-        dataAccess.closeConnection();
-        return searchResults;
+// Prevent accidential full table results.
+// Use loadAll if all rows must be returned.
+if (first)
+    searchResults = new ArrayList<>();
+else
+    searchResults = listQueryWS(dataAccess.getConnection().prepareStatement(sql.toString()));
+dataAccess.closeConnection();
+return searchResults;
     }
     
     /* (non-Javadoc)
@@ -708,14 +734,14 @@ public class ScheduleDAOImpl implements ScheduleDAO {
         }
         sql.append("ORDER BY "+DBConstants.a_year+" ASC ");
         
-        // Prevent accidential full table results.
-        // Use loadAll if all rows must be returned.
-        if (first)
-            searchResults = new ArrayList<>();
-        else
-            searchResults = listQueryAS(dataAccess.getConnection().prepareStatement(sql.toString()));
-        dataAccess.closeConnection();
-        return searchResults;
+// Prevent accidential full table results.
+// Use loadAll if all rows must be returned.
+if (first)
+    searchResults = new ArrayList<>();
+else
+    searchResults = listQueryAS(dataAccess.getConnection().prepareStatement(sql.toString()));
+dataAccess.closeConnection();
+return searchResults;
     }
     
     /**
@@ -736,7 +762,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             result = stmt.executeUpdate();
         }
         catch (SQLException e) {
-            throw new DAOException(e);
+            throw new SQLException(e);
         }
         return result;
     }
@@ -776,7 +802,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             }
         }
         catch (SQLException e) {
-            throw new DAOException(e);
+            throw new SQLException(e);
         }
         finally {
             if (result != null)
@@ -820,7 +846,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             }
         }
         catch (SQLException e) {
-            throw new DAOException(e);
+            throw new SQLException(e);
         }
         finally {
             if (result != null)
@@ -862,7 +888,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             }
         }
         catch (SQLException e) {
-            throw new DAOException(e);
+            throw new SQLException(e);
         }
         finally {
             if (result != null)
@@ -909,7 +935,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             
         }
         catch (SQLException e) {
-            throw new DAOException(e);
+            throw new SQLException(e);
         }
         finally {
             if (result != null)
@@ -954,7 +980,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             
         }
         catch (SQLException e) {
-            throw new DAOException(e);
+            throw new SQLException(e);
         }
         finally {
             if (result != null)
@@ -997,7 +1023,7 @@ public class ScheduleDAOImpl implements ScheduleDAO {
             
         }
         catch (SQLException e) {
-            throw new DAOException(e);
+            throw new SQLException(e);
         }
         finally {
             if (result != null)
