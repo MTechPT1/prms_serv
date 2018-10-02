@@ -8,7 +8,6 @@ package sg.edu.nus.iss.phoenix.service;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import sg.edu.nus.iss.phoenix.core.dao.DAOFactoryImpl;
-import sg.edu.nus.iss.phoenix.core.exceptions.DAOException;
 import sg.edu.nus.iss.phoenix.core.exceptions.NotFoundException;
 import sg.edu.nus.iss.phoenix.dao.ScheduleDAO;
 import sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot;
@@ -38,7 +37,7 @@ public class ScheduleService {
      * @param year
      * @return
      */
-    public AnnualSchedule findAS (String year) {
+    public AnnualSchedule findAS (String year) throws SQLException {
         ArrayList<AnnualSchedule> currentasList;
         AnnualSchedule currentas = new AnnualSchedule();
         currentas.setYear(year);
@@ -51,8 +50,7 @@ public class ScheduleService {
                 currentas = null;
             //   return currentas;
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         }
         return currentas;
     }
@@ -61,13 +59,12 @@ public class ScheduleService {
      * Find list of all Annual Schedules
      * @return
      */
-    public ArrayList<AnnualSchedule> findAllAS() {
+    public ArrayList<AnnualSchedule> findAllAS() throws SQLException {
         ArrayList<AnnualSchedule> currentList = new ArrayList<AnnualSchedule>();
         try {
             currentList = (ArrayList<AnnualSchedule>) scheduleDAO.loadAllAS();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         }
         return currentList;
     }
@@ -77,7 +74,7 @@ public class ScheduleService {
      * @param year
      * @return
      */
-    public WeeklySchedule findWS (String year) {
+    public WeeklySchedule findWS (String year) throws SQLException {
         ArrayList<WeeklySchedule> currentwsList;
         WeeklySchedule currentws = new WeeklySchedule();
         currentws.setYear(year);
@@ -89,8 +86,7 @@ public class ScheduleService {
             else
                 currentws = null;
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         }
         return currentws;
     }
@@ -100,13 +96,12 @@ public class ScheduleService {
      * @param year
      * @return
      */
-    public ArrayList<WeeklySchedule> findAllWS(String year) {
+    public ArrayList<WeeklySchedule> findAllWS(String year) throws SQLException {
         ArrayList<WeeklySchedule> currentList = new ArrayList<WeeklySchedule>();
         try {
             currentList = (ArrayList<WeeklySchedule>) scheduleDAO.loadAllWS(year);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         }
         return currentList;
     }
@@ -117,15 +112,14 @@ public class ScheduleService {
      * @param year
      * @return
      */
-    public ArrayList<ProgramSlot> findPSByDates(int weekId, String year) {
+    public ArrayList<ProgramSlot> findPSByDates(int weekId, String year) throws SQLException {
         String startDate=year+"-01-01 00:00:00";
         String endDate=year+"-12-31 23:59:59";
         ArrayList<ProgramSlot> currentList = new ArrayList<ProgramSlot>();
         try {
             currentList = (ArrayList<ProgramSlot>) scheduleDAO.searchMatchingDates(weekId,startDate,endDate);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         }
         return currentList;
     }
@@ -135,13 +129,12 @@ public class ScheduleService {
      * @param ps
      * @return
      */
-    public ArrayList<ProgramSlot> findPSByCriteria(ProgramSlot ps) {
+    public ArrayList<ProgramSlot> findPSByCriteria(ProgramSlot ps) throws SQLException {
         ArrayList<ProgramSlot> currentList = new ArrayList<ProgramSlot>();
         try {
             currentList = (ArrayList<ProgramSlot>) scheduleDAO.searchMatching(ps);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         }
         return currentList;
     }
@@ -151,15 +144,14 @@ public class ScheduleService {
      * @param programSlotId
      * @return
      */
-    public ProgramSlot findPS(int programSlotId) {
+    public ProgramSlot findPS(int programSlotId) throws SQLException {
         ProgramSlot currentps = new ProgramSlot();
         currentps.setProgramSlotId(programSlotId);
         try {
             currentps = ((ArrayList<ProgramSlot>) scheduleDAO
                     .searchMatching(currentps)).get(0);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         }
         return currentps;
     }
@@ -168,13 +160,12 @@ public class ScheduleService {
      * Find list of all Program Slots
      * @return
      */
-    public ArrayList<ProgramSlot> findAllPS() {
+    public ArrayList<ProgramSlot> findAllPS() throws SQLException {
         ArrayList<ProgramSlot> currentList = new ArrayList<ProgramSlot>();
         try {
             currentList = (ArrayList<ProgramSlot>) scheduleDAO.loadAll();
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         }
         return currentList;
     }
@@ -183,12 +174,11 @@ public class ScheduleService {
      * Create a ProgramSlot
      * @param ps
      */
-    public void processCreate(ProgramSlot ps) {
+    public void processCreate(ProgramSlot ps) throws SQLException {
         try {
             scheduleDAO.createPS(ps);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            throw new DAOException(e);
+            throw(e);
         }
     }
     
@@ -196,15 +186,13 @@ public class ScheduleService {
      * Modify a ProgramSlot
      * @param ps
      */
-    public void processModify(ProgramSlot ps) {
+    public void processModify(ProgramSlot ps) throws NotFoundException, SQLException {
         try {
             scheduleDAO.save(ps);
         } catch (NotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         }
         
     }
@@ -213,16 +201,14 @@ public class ScheduleService {
      * Delete a ProgramSlot
      * @param programSlotId
      */
-    public void processDelete(int programSlotId) {
+    public void processDelete(int programSlotId) throws NotFoundException, SQLException {
         try {
             ProgramSlot ps = new ProgramSlot(programSlotId);
             scheduleDAO.delete(ps);
         } catch (NotFoundException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            throw(e);
         }
     }
 }

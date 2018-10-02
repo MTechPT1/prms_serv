@@ -13,7 +13,7 @@ public class DBConstants {
     // Table names
     public static final String usersTableName = "user";
     public static final String rolesTableName = "role";
-    public static final String programTableName = "radio-programs";
+    public static final String programTableName = "tblradioprogram";
     public static final String scheduleTableName = "tblprogramslot";
     public static final String wScheduleTableName = "tblweeklyschedule";
     public static final String aScheduleTableName = "tblannualschedule";
@@ -60,4 +60,5 @@ public class DBConstants {
     public static final String exc_missing_program_slot = "Program slot object not found !";
     public static final String exc_missing_weekly_schedule = "Weekly schedule object not found !";
     public static final String exc_missing_annual_schedule = "Annualschedule object not found !";
+    public static final String exc_program_slot_assigned = "Program slot assigned !";
 }

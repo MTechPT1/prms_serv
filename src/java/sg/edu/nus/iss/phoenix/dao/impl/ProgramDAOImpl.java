@@ -55,7 +55,7 @@ public class ProgramDAOImpl implements ProgramDAO {
 			throw new NotFoundException("Can not select without Primary-Key!");
 		}
 
-		String sql = "SELECT * FROM `radio-program` WHERE (`name` = ? ); ";
+		String sql = "SELECT * FROM "+DBConstants.programTableName+" WHERE (`name` = ? ); ";
 		PreparedStatement stmt = null;
 		openConnection();
 		try {
@@ -77,7 +77,7 @@ public class ProgramDAOImpl implements ProgramDAO {
 	@Override
 	public List<RadioProgram> loadAll() throws SQLException {
 		openConnection();
-		String sql = "SELECT * FROM `radio-program` ORDER BY `name` ASC; ";
+		String sql = "SELECT * FROM `"+DBConstants.programTableName+"` ORDER BY `name` ASC; ";
 		List<RadioProgram> searchResults = listQuery(connection
 				.prepareStatement(sql));
 		closeConnection();
@@ -96,7 +96,7 @@ public class ProgramDAOImpl implements ProgramDAO {
 		PreparedStatement stmt = null;
 		openConnection();
 		try {
-			sql = "INSERT INTO `radio-program` (`name`, `desc`, `typicalDuration`) VALUES (?,?,?); ";
+			sql = "INSERT INTO `"+DBConstants.programTableName+"` (`name`, `desc`, `typicalDuration`) VALUES (?,?,?); ";
 			stmt = connection.prepareStatement(sql);
 			stmt.setString(1, valueObject.getName());
 			stmt.setString(2, valueObject.getDescription());
@@ -122,7 +122,7 @@ public class ProgramDAOImpl implements ProgramDAO {
 	public void save(RadioProgram valueObject) throws NotFoundException,
 			SQLException {
 
-		String sql = "UPDATE `radio-program` SET `desc` = ?, `typicalDuration` = ? WHERE (`name` = ? ); ";
+		String sql = "UPDATE `"+DBConstants.programTableName+"` SET `desc` = ?, `typicalDuration` = ? WHERE (`name` = ? ); ";
 		PreparedStatement stmt = null;
 		openConnection();
 		try {
@@ -162,7 +162,7 @@ public class ProgramDAOImpl implements ProgramDAO {
 			throw new NotFoundException("Can not delete without Primary-Key!");
 		}
 
-		String sql = "DELETE FROM `radio-program` WHERE (`name` = ? ); ";
+		String sql = "DELETE FROM `"+DBConstants.programTableName+"` WHERE (`name` = ? ); ";
 		PreparedStatement stmt = null;
 		openConnection();
 		try {
@@ -193,7 +193,7 @@ public class ProgramDAOImpl implements ProgramDAO {
 	@Override
 	public void deleteAll(Connection conn) throws SQLException {
 
-		String sql = "DELETE FROM `radio-program`";
+		String sql = "DELETE FROM `"+DBConstants.programTableName+"`";
 		PreparedStatement stmt = null;
 		openConnection();
 		try {
@@ -214,7 +214,7 @@ public class ProgramDAOImpl implements ProgramDAO {
 	@Override
 	public int countAll() throws SQLException {
 
-		String sql = "SELECT count(*) FROM `radio-program`";
+		String sql = "SELECT count(*) FROM `"+DBConstants.programTableName+"`";
 		PreparedStatement stmt = null;
 		ResultSet result = null;
 		int allRows = 0;
@@ -246,7 +246,7 @@ public class ProgramDAOImpl implements ProgramDAO {
 		openConnection();
 		boolean first = true;
 		StringBuilder sql = new StringBuilder(
-				"SELECT * FROM `radio-program` WHERE 1=1 ");
+				"SELECT * FROM `"+DBConstants.programTableName+"` WHERE 1=1 ");
 
 		if (valueObject.getName() != null) {
 			if (first) {

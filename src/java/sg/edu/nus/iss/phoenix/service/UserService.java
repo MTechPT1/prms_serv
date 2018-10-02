@@ -35,7 +35,7 @@ public class UserService {
         userDAO = daoFactory.getUserDAO();
     }
     
-    public Response getUsers(String roleType) {
+    public Response getUsers(String roleType) throws SQLException {
         if (roleType == null) {
             roleType = "ALL";
         }
@@ -49,7 +49,7 @@ public class UserService {
             userList = userDAO.loadAll();
         } catch (SQLException e) {
             logger.error("SQL Exception");
-            e.printStackTrace();
+            throw(e);
         }
         
         if (!"ALL".equals(roleType)) {
@@ -60,7 +60,7 @@ public class UserService {
         return Response.ok(users, MediaType.APPLICATION_JSON).build();
     }
     
-    public Response getUser(String userId) {
+    public Response getUser(String userId) throws NotFoundException, SQLException {
         User user = new User();
         
         logger.debug("Fetching user with user id: " + userId);
@@ -69,43 +69,45 @@ public class UserService {
             user = userDAO.getObject(userId);
         } catch (NotFoundException ex) {
             logger.error("Not able to find user with id: " + userId);
+            throw(ex);
         } catch (SQLException ex) {
             logger.error("SQL Exception");
-            ex.printStackTrace();
+            throw(ex);
         }
         
         return Response.ok(user, MediaType.APPLICATION_JSON).build();
     }
     
-    public Response createUser(User user) {
+    public Response createUser(User user) throws SQLException {
         logger.debug("Creating a new user: " + user.toString());
         
         try {
             userDAO.create(user);
         } catch (SQLException ex) {
             logger.error("Unable to create user due to sql exception");
-            ex.printStackTrace();
+            throw(ex);
         }
         
         return Response.ok(user, MediaType.APPLICATION_JSON).build();
     }
     
-    public Response modifyUser(User user) {
+    public Response modifyUser(User user) throws NotFoundException, SQLException {
         logger.debug("Modifying user: " + user.toString());
         
         try {
             userDAO.save(user);
         } catch (NotFoundException ex) {
             logger.error("Unable to find and modify user with id: " + user.getId());
+            throw(ex);
         } catch (SQLException ex) {
             logger.error("SQL Exception");
-            ex.printStackTrace();
+            throw(ex);
         }
         
         return Response.ok(user, MediaType.APPLICATION_JSON).build();
     }
     
-    public Response deleteUser(String userId) {
+    public Response deleteUser(String userId) throws NotFoundException, SQLException {
         logger.debug("Deleting user with userId: " + userId);
         
         User user = new User();
@@ -115,9 +117,10 @@ public class UserService {
             userDAO.delete(user);
         } catch (NotFoundException ex) {
             logger.error("Unable to find and delete user with id: " + user.getId());
+            throw(ex);
         } catch (SQLException ex) {
             logger.error("SQL Exception");
-            ex.printStackTrace();
+            throw(ex);
         }
         
         return Response.ok().build();

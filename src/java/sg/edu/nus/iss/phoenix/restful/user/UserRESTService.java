@@ -5,6 +5,7 @@
  */
 package sg.edu.nus.iss.phoenix.restful.user;
 
+import java.sql.SQLException;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
@@ -18,6 +19,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.UriInfo;
+import sg.edu.nus.iss.phoenix.core.exceptions.NotFoundException;
 import sg.edu.nus.iss.phoenix.entity.authenticate.User;
 import sg.edu.nus.iss.phoenix.service.UserService;
 
@@ -39,15 +41,15 @@ public class UserRESTService {
     
     @GET
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getAllUsers(
-            @QueryParam("role_type") String roleType) {
+    public Response getAllUsers (
+            @QueryParam("role_type") String roleType) throws NotFoundException, SQLException{
         return service.getUsers(roleType);
     }
     
     @GET
     @Path("{user_id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response getUser(@PathParam("user_id") String userId) {
+    public Response getUser(@PathParam("user_id") String userId) throws NotFoundException, SQLException{
         return service.getUser(userId);
     }
     
@@ -55,7 +57,7 @@ public class UserRESTService {
     @Path("create")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response createUser(User user) {
+    public Response createUser(User user) throws SQLException{
         return service.createUser(user);
     }
     
@@ -63,14 +65,14 @@ public class UserRESTService {
     @Path("update")
     @Consumes(MediaType.APPLICATION_JSON)
     @Produces(MediaType.APPLICATION_JSON)
-    public Response updateUser(User user) {
+    public Response updateUser(User user) throws NotFoundException, SQLException{
         return service.modifyUser(user);
     }
     
     @DELETE
     @Path("delete/{user_id}")
     @Produces(MediaType.APPLICATION_JSON)
-    public Response deleteUser(@PathParam("user_id") String userId) {
+    public Response deleteUser(@PathParam("user_id") String userId) throws NotFoundException, SQLException{
         return service.deleteUser(userId);
     }
     
