@@ -63,88 +63,86 @@ insert into `phoenix`.`user` values("dogbert", "dogbert", "dogbert, the CEO", "p
 -- -----------------------------------------------------
 -- Table `phoenix`.`radio-program`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `phoenix`.`radio-program` ;
+DROP TABLE IF EXISTS `phoenix`.`tblradioprogram` ;
 
-CREATE TABLE IF NOT EXISTS `phoenix`.`radio-program` (
+CREATE TABLE IF NOT EXISTS `phoenix`.`tblradioprogram` (
   `name` VARCHAR(45) NOT NULL ,
   `desc` VARCHAR(100) NULL ,
   `typicalDuration` TIME NULL ,
-  PRIMARY KEY (`name`) )
+  PRIMARY KEY (`name`) ,
+  UNIQUE KEY `name_UNIQUE` (`name`))
 ENGINE = InnoDB;
-
-CREATE UNIQUE INDEX `name_UNIQUE` ON `phoenix`.`radio-program` (`name` ASC) ;
-
 
 -- -----------------------------------------------------
 -- Insert Data For Table `phoenix`.`radio-program`
 -- -----------------------------------------------------
 
-insert into `phoenix`.`radio-program` values("short news", "summarised 5 minutes broadcasted every 2 hours", '00:05:00');
-insert into `phoenix`.`radio-program` values("news", "full news broadcasted four times a day", '00:30:00');
-insert into `phoenix`.`radio-program` values("top 10", "countdown music play of top 10 songs of the week", '01:00:00');
-insert into `phoenix`.`radio-program` values("your choice", "audinece ask for music album song of thier choice", '01:00:00');
-insert into `phoenix`.`radio-program` values("opinions", "discuss, debate or share opinions regarding a theme or subject", '00:30:00');
-insert into `phoenix`.`radio-program` values("noose", "black comedy show", '00:30:00');
-insert into `phoenix`.`radio-program` values("ppk", "phu chu kang comedy show", '00:30:00');
-insert into `phoenix`.`radio-program` values("dance floor", "dance show", '00:30:00');
-insert into `phoenix`.`radio-program` values("charity", "president charity show for unfortunate", '00:30:00');
+insert into `phoenix`.`tblradioprogram` values("short news", "summarised 5 minutes broadcasted every 2 hours", '00:05:00');
+insert into `phoenix`.`tblradioprogram` values("news", "full news broadcasted four times a day", '00:30:00');
+insert into `phoenix`.`tblradioprogram` values("top 10", "countdown music play of top 10 songs of the week", '01:00:00');
+insert into `phoenix`.`tblradioprogram` values("your choice", "audinece ask for music album song of thier choice", '01:00:00');
+insert into `phoenix`.`tblradioprogram` values("opinions", "discuss, debate or share opinions regarding a theme or subject", '00:30:00');
+insert into `phoenix`.`tblradioprogram` values("noose", "black comedy show", '00:30:00');
+insert into `phoenix`.`tblradioprogram` values("ppk", "phu chu kang comedy show", '00:30:00');
+insert into `phoenix`.`tblradioprogram` values("dance floor", "dance show", '00:30:00');
+insert into `phoenix`.`tblradioprogram` values("charity", "president charity show for unfortunate", '00:30:00');
 
 -- -----------------------------------------------------
 -- Table `phoenix`.`annual-schedule`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `phoenix`.`annual-schedule` ;
+DROP TABLE IF EXISTS `phoenix`.`tblannualschedule` ;
 
-CREATE  TABLE IF NOT EXISTS `phoenix`.`annual-schedule` (
-  `year` INT NOT NULL ,
-  `assingedBy` VARCHAR(45) NULL ,
+CREATE  TABLE IF NOT EXISTS `phoenix`.`tblannualschedule` (
+  `year` VARCHAR(4) NOT NULL ,
+  `assignedBy` VARCHAR(45) NULL ,
   PRIMARY KEY (`year`) ,
-  CONSTRAINT `id_as`
-    FOREIGN KEY (`assingedBy` )
-    REFERENCES `phoenix`.`user` (`id` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
+  UNIQUE KEY `year_UNIQUE` (`year`),
+  KEY `is_annual_schedule` (`assignedBy`))
 ENGINE = InnoDB;
-
-CREATE INDEX `id_annual_schedule` ON `phoenix`.`annual-schedule` (`assingedBy` ASC) ;
-
--- -----------------------------------------------------
--- Table `phoenix`.`program-slot`
--- -----------------------------------------------------
-DROP TABLE IF EXISTS `phoenix`.`program-slot` ;
-
-CREATE  TABLE IF NOT EXISTS `phoenix`.`program-slot` (
-  `duration` TIME NOT NULL ,
-  `dateOfProgram` DATETIME NOT NULL ,
-  `startTime` DATETIME NULL ,
-  `program-name` VARCHAR(45) NULL ,
-  PRIMARY KEY (`duration`, `dateOfProgram`) ,
-  CONSTRAINT `name`
-    FOREIGN KEY (`program-name` )
-    REFERENCES `phoenix`.`radio-program` (`name` )
-    ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB;
-
-CREATE INDEX `name_program_slot` ON `phoenix`.`program-slot` (`program-name` ASC) ;
-
-CREATE UNIQUE INDEX `dateOfProgram_UNIQUE` ON `phoenix`.`program-slot` (`dateOfProgram` ASC) ;
-
 
 -- -----------------------------------------------------
 -- Table `phoenix`.`weekly-schedule`
 -- -----------------------------------------------------
-DROP TABLE IF EXISTS `phoenix`.`weekly-schedule` ;
-CREATE  TABLE IF NOT EXISTS `phoenix`.`weekly-schedule` (
-  `startDate` DATETIME NOT NULL ,
+DROP TABLE IF EXISTS `phoenix`.`tblweeklyschedule` ;
+CREATE  TABLE IF NOT EXISTS `phoenix`.`tblweeklyschedule` (
+  `weekId` int(11) NOT NULL ,
+  `startDate` DATE NULL ,
   `assignedBy` VARCHAR(45) NULL ,
-  PRIMARY KEY (`startDate`) ,
-  CONSTRAINT `id_ws`
+  `year` varchar(4) NOT NULL,
+  PRIMARY KEY (`weekId`,`year`) ,
+  CONSTRAINT `assignedBy`
     FOREIGN KEY (`assignedBy` )
     REFERENCES `phoenix`.`user` (`id` )
     ON DELETE NO ACTION
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
-CREATE UNIQUE INDEX `startDate_UNIQUE` ON `phoenix`.`weekly-schedule` (`startDate` ASC) ;
+CREATE UNIQUE INDEX `startDate_UNIQUE` ON `phoenix`.`tblweeklyschedule` (`startDate` ASC) ;
 
-CREATE INDEX `id_assigned_by` ON `phoenix`.`weekly-schedule` (`assignedBy` ASC) ;
+CREATE INDEX `id_assigned_by` ON `phoenix`.`tblweeklyschedule` (`assignedBy` ASC) ;
+
+-- -----------------------------------------------------
+-- Table `phoenix`.`program-slot`
+-- -----------------------------------------------------
+DROP TABLE IF EXISTS `phoenix`.`tblprogramslot` ;
+
+CREATE  TABLE IF NOT EXISTS `phoenix`.`tblprogramslot` (
+  `programSlotId` int(11) unsigned NOT NULL AUTO_INCREMENT,
+  `assignedBy` varchar(45) NULL ,
+  `duration` int(11) NULL ,
+  `startDate` DATETIME NULL ,
+  `program-name` VARCHAR(45) NULL ,
+  `presenterId` VARCHAR(45) NULL ,
+  `producerId` VARCHAR(45) NULL ,
+  `weekId` int(11) NULL ,
+  PRIMARY KEY (`programSlotId`) ,
+  KEY `assignedBy_idx` (`assignedBy`),
+  KEY `weekId_idx` (`weekId`),
+  CONSTRAINT `weekId`
+    FOREIGN KEY (`weekId` )
+    REFERENCES `phoenix`.`tblweeklyschedule` (`weekId` )
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION)
+ENGINE = InnoDB;
+
+CREATE UNIQUE INDEX `programSlotId_UNIQUE` ON `phoenix`.`tblprogramslot` (`programSlotId` ASC) ;
