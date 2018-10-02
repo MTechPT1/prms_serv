@@ -5,13 +5,11 @@
  */
 package sg.edu.nus.iss.phoenix.core.exceptions;
 
-import javax.xml.bind.annotation.XmlRootElement;
-
 /**
  *
  * @author Karen Athaide
  */
-@XmlRootElement
+
 public class ErrorMessage {
     private String httpStatus;
     private String errorMessage;
