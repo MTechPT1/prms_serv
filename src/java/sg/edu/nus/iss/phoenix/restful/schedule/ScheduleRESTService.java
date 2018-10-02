@@ -5,6 +5,7 @@
  */
 package sg.edu.nus.iss.phoenix.restful.schedule;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import javax.enterprise.context.RequestScoped;
 import javax.ws.rs.Consumes;
@@ -18,6 +19,7 @@ import javax.ws.rs.Produces;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.UriInfo;
+import sg.edu.nus.iss.phoenix.core.exceptions.NotFoundException;
 import sg.edu.nus.iss.phoenix.entity.schedule.ProgramSlot;
 import sg.edu.nus.iss.phoenix.entity.schedule.AnnualSchedule;
 import sg.edu.nus.iss.phoenix.entity.schedule.WeeklySchedule;
@@ -49,7 +51,7 @@ public class ScheduleRESTService {
     @GET
     @Path("/annual/all")
     @Produces(MediaType.APPLICATION_JSON)
-    public AnnualSchedules getAllAnnualSchedules() {
+    public AnnualSchedules getAllAnnualSchedules() throws SQLException {
         ArrayList<AnnualSchedule> aslist = service.findAllAS();
         AnnualSchedules asList = new AnnualSchedules();
         asList.setAsList(new ArrayList<AnnualSchedule>());
@@ -71,7 +73,7 @@ public class ScheduleRESTService {
     @GET
     @Path("/annual/{year}")
     @Produces(MediaType.APPLICATION_JSON)
-    public AnnualSchedule getAnnualSchedule(@PathParam("year") String year) {
+    public AnnualSchedule getAnnualSchedule(@PathParam("year") String year) throws SQLException {
         AnnualSchedule as = new AnnualSchedule();
         as = service.findAS(year);
         return as;
@@ -85,7 +87,7 @@ public class ScheduleRESTService {
     @GET
     @Path("/weekly/{year}")
     @Produces(MediaType.APPLICATION_JSON)
-    public AnnualSchedules getAllWeeklySchedules(@PathParam("year") String year) {
+    public AnnualSchedules getAllWeeklySchedules(@PathParam("year") String year) throws SQLException {
         ArrayList<WeeklySchedule> wslist = service.findAllWS(year);
         AnnualSchedules wsList = new AnnualSchedules();
         wsList.setWsList(new ArrayList<WeeklySchedule>());
@@ -107,7 +109,7 @@ public class ScheduleRESTService {
     @GET
     @Path("/{programSlotId}")
     @Produces(MediaType.APPLICATION_JSON)
-    public ProgramSlot getProgramSlot(@PathParam("programSlotId") int programSlotId) {
+    public ProgramSlot getProgramSlot(@PathParam("programSlotId") int programSlotId) throws SQLException {
         ProgramSlot ps = new ProgramSlot();
         ps = service.findPS(programSlotId);
         return ps;
@@ -122,7 +124,7 @@ public class ScheduleRESTService {
     @GET
     @Path("/{weekId}/{year}")
     @Produces(MediaType.APPLICATION_JSON)
-    public AnnualSchedules getProgramSlots(@PathParam("weekId") int weekId, @PathParam("year") String year) {
+    public AnnualSchedules getProgramSlots(@PathParam("weekId") int weekId, @PathParam("year") String year) throws SQLException {
         ArrayList<ProgramSlot> pslist = service.findPSByDates(weekId, year);
         AnnualSchedules psList = new AnnualSchedules();
         psList.setPsList(new ArrayList<>()); 
@@ -147,7 +149,7 @@ public class ScheduleRESTService {
     @GET
     @Path("/all")
     @Produces(MediaType.APPLICATION_JSON)
-    public AnnualSchedules getAllProgramSlots() {
+    public AnnualSchedules getAllProgramSlots() throws SQLException {
         ArrayList<ProgramSlot> pslist = service.findAllPS();
         AnnualSchedules psList = new AnnualSchedules();
         psList.setPsList(new ArrayList<>()); 
@@ -172,7 +174,7 @@ public class ScheduleRESTService {
     @PUT
     @Path("/update")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void updateProgramSlot(ProgramSlot ps) {
+    public void updateProgramSlot(ProgramSlot ps) throws NotFoundException, SQLException {
         service.processModify(ps);
     }
     
@@ -183,7 +185,7 @@ public class ScheduleRESTService {
     @POST
     @Path("/create")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void createProgramSlot(ProgramSlot ps) {
+    public void createProgramSlot(ProgramSlot ps) throws SQLException {
         service.processCreate(ps);
     }
     
@@ -194,7 +196,7 @@ public class ScheduleRESTService {
     @POST
     @Path("/copy")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void copyProgramSlot(ProgramSlot ps) {
+    public void copyProgramSlot(ProgramSlot ps) throws NotFoundException, SQLException {
         service.processCreate(ps);
     }
     
@@ -205,7 +207,7 @@ public class ScheduleRESTService {
     @DELETE
     @Path("/delete/{programSlotId}")
     @Consumes(MediaType.APPLICATION_JSON)
-    public void deleteProgramSlot(@PathParam("programSlotId") int programSlotId) {
+    public void deleteProgramSlot(@PathParam("programSlotId") int programSlotId) throws NotFoundException, SQLException {
         service.processDelete(programSlotId);
     }    
 }

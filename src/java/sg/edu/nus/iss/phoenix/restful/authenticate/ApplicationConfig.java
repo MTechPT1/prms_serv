@@ -29,6 +29,7 @@ public class ApplicationConfig extends Application {
      * If required, comment out calling this method in getClasses().
      */
     private void addRestResourceClasses(Set<Class<?>> resources) {
+        resources.add(sg.edu.nus.iss.phoenix.core.exceptions.GenericExceptionMapper.class);
         resources.add(sg.edu.nus.iss.phoenix.restful.authenticate.AuthenticateRESTService.class);
         resources.add(sg.edu.nus.iss.phoenix.restful.radioprogram.ProgramRESTService.class);
         resources.add(sg.edu.nus.iss.phoenix.restful.schedule.ScheduleRESTService.class);
