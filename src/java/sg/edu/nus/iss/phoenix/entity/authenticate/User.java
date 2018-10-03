@@ -118,12 +118,13 @@ public class User implements Cloneable, Serializable {
      * variables, without going trough the individual set-methods.
      */
     public void setAll(String idIn, String passwordIn, String nameIn,
-            String roleIn) {
+            String roleIn, String joinDate) {
         this.id = idIn;
         this.password = passwordIn;
         this.name = nameIn;
         Role e = new Role(roleIn);
         this.roles.add(e);
+        this.joinDate = joinDate;
     }
 
     /**
